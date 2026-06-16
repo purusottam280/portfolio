@@ -7,11 +7,11 @@ import { GithubIcon, LinkedinIcon } from './Icons'
 import type { Engine } from '@tsparticles/engine'
 
 const ROLES = [
-  'Agentic AI Engineer',
-  'LLM Applications Builder',
+  'AI / ML Engineer',
+  'Agentic Systems Builder',
   'Multi-Agent Architect',
   'RAG Pipeline Specialist',
-  'AI Systems Developer',
+  'LLM Applications Developer',
 ]
 
 const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'

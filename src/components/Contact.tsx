@@ -113,18 +113,41 @@ export default function Contact() {
     e.preventDefault()
     if (!name || !email || !message) return
     setStatus('sending')
-    await new Promise(r => setTimeout(r, 1800))
-    setStatus('success')
-    setName(''); setEmail(''); setMessage('')
-    setTimeout(() => setStatus('idle'), 4000)
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/purusottampatel2001@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message
+        })
+      })
+      if (response.ok) {
+        setStatus('success')
+        setName('')
+        setEmail('')
+        setMessage('')
+      } else {
+        setStatus('error')
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      setStatus('error')
+    } finally {
+      setTimeout(() => setStatus('idle'), 4000)
+    }
   }
 
   const contactItems = [
     {
       Icon: Mail,
       label: 'Email',
-      value: 'purusottam280@gmail.com',
-      href: 'mailto:purusottam280@gmail.com',
+      value: 'purusottampatel2001@gmail.com',
+      href: 'mailto:purusottampatel2001@gmail.com',
       color: '#6366F1',
     },
     {

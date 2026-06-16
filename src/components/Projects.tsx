@@ -6,11 +6,11 @@ const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
 const projects = [
   {
-    title: 'LangGraph ATS System',
-    subtitle: 'Autonomous Recruitment Intelligence',
+    title: 'Hiring Intelligence & ATS Platform',
+    subtitle: 'End-to-End Recruitment Automation',
     description:
-      'Autonomous Applicant Tracking System powered by LangGraph agents — resume parsing, candidate ranking, interview generation, and personalized feedback with zero human intervention.',
-    tags: ['LangGraph', 'Python', 'FastAPI', 'LLM', 'Multi-Agent', 'PostgreSQL'],
+      'Built an end-to-end recruitment platform covering resume parsing, ATS scoring, and candidate pipeline management — supporting PDF, DOCX, and scanned image resumes via Groq LLaMA-3.3-70b, Tesseract OCR, and NLP-based fallback mechanisms.',
+    tags: ['Groq LLaMA-3.3', 'FastAPI', 'PostgreSQL', 'Docker', 'React', 'Tesseract OCR', 'GitHub Actions'],
     glowColor: 'rgba(99,102,241,0.3)',
     accentColor: '#6366F1',
     accentBg: 'rgba(99,102,241,0.1)',
@@ -18,15 +18,15 @@ const projects = [
     icon: '🤖',
     github: 'https://github.com/purusottam280',
     featured: true,
-    metric: '6+',
-    metricLabel: 'Agents',
+    metric: 'LLaMA-3.3',
+    metricLabel: 'Groq Engine',
   },
   {
-    title: 'Multilingual RAG Pipeline',
+    title: 'Multilingual Financial Q&A (RAG)',
     subtitle: 'Cross-lingual Knowledge Retrieval',
     description:
-      'Production-grade RAG system with hybrid BM25 + dense retrieval, cross-lingual re-ranking, and knowledge graph for complex multi-hop reasoning across 12+ languages.',
-    tags: ['RAG', 'LangChain', 'ChromaDB', 'FastAPI', 'Transformers', 'Docker'],
+      'Designed a RAG-powered financial document analysis tool using Gemini 2.0 + LangChain + Pinecone to summarize Indian Budget PDFs, with multilingual support across English and 10 Indian languages via SpeechRecognition, gTTS, and Deep Translator.',
+    tags: ['Gemini 2.0', 'LangChain', 'Pinecone', 'Streamlit', 'SpeechRecognition', 'gTTS', 'Python'],
     glowColor: 'rgba(6,182,212,0.3)',
     accentColor: '#06B6D4',
     accentBg: 'rgba(6,182,212,0.08)',
@@ -34,42 +34,27 @@ const projects = [
     icon: '🌐',
     github: 'https://github.com/purusottam280',
     featured: true,
-    metric: '12+',
-    metricLabel: 'Languages',
+    metric: '10+',
+    metricLabel: 'Indian Languages',
   },
   {
-    title: 'Multi-Agent Travel Planner',
-    subtitle: 'Collaborative Agent Orchestration',
+    title: 'Agentic Travel Itinerary Planner',
+    subtitle: 'StateGraph Travel Orchestration',
     description:
-      'Orchestrated travel planning with specialized agents — flight researcher, hotel curator, itinerary builder, and budget optimizer delivering complete travel plans autonomously.',
-    tags: ['CrewAI', 'GPT-4', 'Serper API', 'Streamlit', 'LangChain', 'Python'],
+      'Engineered a multi-step agentic travel planner using LangGraph and Groq LLaMA-3.1 with specialized nodes for user profile analysis, hotel/place recommendations, cost estimation, and itinerary generation with controlled, multi-hop reasoning.',
+    tags: ['LangGraph', 'Groq LLaMA-3.1', 'StateGraph', 'Python', 'Travel Planning'],
     glowColor: 'rgba(139,92,246,0.3)',
     accentColor: '#8B5CF6',
     accentBg: 'rgba(139,92,246,0.08)',
     accentBorder: 'rgba(139,92,246,0.22)',
     icon: '✈️',
     github: 'https://github.com/purusottam280',
-    featured: false,
-    metric: '4',
-    metricLabel: 'Agents',
-  },
-  {
-    title: 'Smart Surveillance AI',
-    subtitle: 'Real-time Vision Intelligence',
-    description:
-      'Real-time computer vision surveillance with YOLOv8 detection, DeepSORT multi-object tracking, and LLM-powered natural language anomaly narration.',
-    tags: ['YOLOv8', 'OpenCV', 'DeepSORT', 'FastAPI', 'WebSocket', 'LLM'],
-    glowColor: 'rgba(249,115,22,0.28)',
-    accentColor: '#F97316',
-    accentBg: 'rgba(249,115,22,0.07)',
-    accentBorder: 'rgba(249,115,22,0.2)',
-    icon: '👁️',
-    github: 'https://github.com/purusottam280',
-    featured: false,
-    metric: '30+',
-    metricLabel: 'FPS',
+    featured: true,
+    metric: 'LLaMA 3.1',
+    metricLabel: 'Groq Engine',
   },
 ]
+
 
 function ProjectCard({ project, index }: { project: typeof projects[0]; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -404,7 +389,7 @@ export default function Projects() {
         {/* ── Cards Grid ─────────────────────────────────── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: 20,
         }}>
           {projects.map((project, i) => (

@@ -55,7 +55,7 @@ export default function Footer() {
               fontSize: '0.875rem',
             }}
           >
-            Agentic AI Engineer
+            AI / ML Engineer
           </span>
         </div>
 

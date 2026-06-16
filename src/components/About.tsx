@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Brain, Zap, Code2, Layers } from 'lucide-react'
 
@@ -46,6 +47,15 @@ const pillars = [
 ]
 
 export default function About() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 992)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <section
       id="about"
@@ -108,13 +118,54 @@ export default function About() {
         {/* ── Two-column layout ─── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 64,
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: isMobile ? 40 : 64,
           alignItems: 'start',
         }}>
 
           {/* LEFT: Bio + Stats */}
           <div>
+            {/* Profile Image Container */}
+            <motion.div
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: 320,
+                height: 400,
+                borderRadius: 24,
+                overflow: 'hidden',
+                margin: isMobile ? '0 auto 32px' : '0 0 32px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+              }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              whileHover={{
+                scale: 1.02,
+                borderColor: 'rgba(99, 102, 241, 0.4)',
+                boxShadow: '0 20px 40px rgba(99, 102, 241, 0.15)',
+              }}
+            >
+              <img
+                src="/profile.jpg"
+                alt="Purusottam Patel"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'contrast(1.02) brightness(0.98)',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(10, 10, 15, 0.8) 0%, transparent 60%)',
+                }}
+              />
+            </motion.div>
             <motion.p
               style={{
                 fontFamily: 'Inter, sans-serif', fontSize: 16, lineHeight: 1.8,
@@ -125,8 +176,7 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ delay: 0.1, duration: 0.7, ease: easeSmooth }}
             >
-              I'm <strong style={{ color: '#fff', fontWeight: 600 }}>Purusottam Patel</strong>, an Agentic AI
-              &amp; LLM Applications Engineer passionate about building AI systems that go beyond
+              I'm <strong style={{ color: '#fff', fontWeight: 600 }}>Purusottam Patel</strong>, an AI/ML Engineer &amp; Agentic Systems Builder passionate about building AI systems that go beyond
               simple prompt-response — systems that plan, execute, and adapt autonomously.
             </motion.p>
 
@@ -140,8 +190,8 @@ export default function About() {
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.7, ease: easeSmooth }}
             >
-              My work spans LangGraph-based agent orchestration, multilingual RAG pipelines,
-              smart surveillance AI, and autonomous travel planning systems. I bridge the gap
+              My work spans Hiring Intelligence &amp; ATS automation platforms, multilingual document
+              retrieval systems (RAG), and agentic travel itinerary planning. I bridge the gap
               between cutting-edge research and production-ready deployment.
             </motion.p>
 
@@ -185,7 +235,7 @@ export default function About() {
           </div>
 
           {/* RIGHT: Expertise pillars */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             {pillars.map((p, i) => (
               <motion.div
                 key={p.title}
