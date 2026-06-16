@@ -79,35 +79,6 @@ I am passionate about leveraging cutting-edge AI to solve real-world problems an
 
 ---
 
-## ⚡ Portfolio Project Setup
-This portfolio website is built using **React + TypeScript + Vite** with **Framer Motion** for premium interactive micro-animations.
-
-### Local Development
-To run this portfolio locally on your machine:
-
-1. Clone the repository and navigate to the project directory:
-   ```bash
-   git clone https://github.com/purusottam280/portfolio.git
-   cd portfolio
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the local development server:
-   ```bash
-   npm run dev
-   ```
-
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
----
-
 ## 📬 Let's Connect
 Whether you want to discuss autonomous agent architectures, hybrid retrieval systems, or just talk about the future of AI engineering, feel free to reach out!
 
