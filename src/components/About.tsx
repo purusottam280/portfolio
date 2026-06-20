@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { motion, useInView } from 'framer-motion'
 import { Brain, Zap, Code2, Layers } from 'lucide-react'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
@@ -48,6 +53,9 @@ const pillars = [
 
 export default function About() {
   const [isMobile, setIsMobile] = useState(false)
+  const containerRef = useRef<HTMLElement>(null)
+  const pillarsRef = useRef<HTMLDivElement>(null)
+  const isPillarsVisible = useInView(pillarsRef, { once: true, margin: '-100px' })
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 992)
@@ -56,14 +64,49 @@ export default function About() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  useGSAP(() => {
+    gsap.to('.aurora-orb-about', {
+      yPercent: 100,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top bottom',
+        end: 'bottom top',
+        scrub: true,
+      }
+    })
+  }, { scope: containerRef })
+
+  // Stable random fly-in configurations for About cards
+  const pillarFlights = useMemo(() => {
+    return pillars.map((_, i) => {
+      const angles = [
+        Math.PI * 0.8,  // Left-bottom
+        Math.PI * 0.2,  // Top-right
+        Math.PI * 1.2,  // Bottom-left
+        Math.PI * 1.8,  // Bottom-right
+      ]
+      const angle = angles[i % angles.length]
+      const distance = 500 + Math.random() * 200
+      return {
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        rotate: -20 + (i * 12),
+        scale: 0.8,
+        delay: i * 0.12 + 0.2,
+      }
+    })
+  }, [])
+
   return (
     <section
       id="about"
+      ref={containerRef}
       style={{ position: 'relative', padding: '112px 24px', overflow: 'hidden' }}
     >
       {/* Aurora */}
       <div
-        className="aurora-orb"
+        className="aurora-orb aurora-orb-about"
         style={{
           width: 500, height: 500,
           background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%)',
@@ -123,49 +166,22 @@ export default function About() {
           alignItems: 'start',
         }}>
 
-          {/* LEFT: Bio + Stats */}
-          <div>
-            {/* Profile Image Container */}
-            <motion.div
-              style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: 320,
-                height: 400,
-                borderRadius: 24,
-                overflow: 'hidden',
-                margin: isMobile ? '0 auto 32px' : '0 0 32px',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
-              }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              whileHover={{
-                scale: 1.02,
-                borderColor: 'rgba(99, 102, 241, 0.4)',
-                boxShadow: '0 20px 40px rgba(99, 102, 241, 0.15)',
-              }}
-            >
-              <img
-                src="/profile.jpg"
-                alt="Purusottam Patel"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  filter: 'contrast(1.02) brightness(0.98)',
-                }}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(to top, rgba(10, 10, 15, 0.8) 0%, transparent 60%)',
-                }}
-              />
-            </motion.div>
+          {/* LEFT: Bio + Stats Card */}
+          <div
+            className="glass-card"
+            style={{
+              background: 'rgba(13,13,22,0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: 24,
+              padding: isMobile ? '24px 20px' : '40px',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+
             <motion.p
               style={{
                 fontFamily: 'Inter, sans-serif', fontSize: 16, lineHeight: 1.8,
@@ -235,46 +251,73 @@ export default function About() {
           </div>
 
           {/* RIGHT: Expertise pillars */}
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
-            {pillars.map((p, i) => (
-              <motion.div
-                key={p.title}
-                style={{
-                  background: 'rgba(13,13,22,0.8)',
-                  border: `1px solid ${p.border}`,
-                  borderRadius: 16,
-                  padding: '20px',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                }}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 + 0.2, duration: 0.6, ease: easeSmooth }}
-                whileHover={{ y: -4, boxShadow: `0 20px 40px ${p.bg}` }}
-              >
-                <div style={{
-                  width: 40, height: 40, borderRadius: 12,
-                  background: p.bg, border: `1px solid ${p.border}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 14,
-                }}>
-                  <p.icon size={18} color={p.color} />
-                </div>
-                <h3 style={{
-                  fontFamily: 'Space Grotesk, sans-serif', fontSize: 14,
-                  fontWeight: 600, color: '#fff', marginBottom: 8,
-                }}>
-                  {p.title}
-                </h3>
-                <p style={{
-                  fontFamily: 'Inter, sans-serif', fontSize: 12.5,
-                  lineHeight: 1.65, color: 'rgba(161,161,170,0.65)',
-                }}>
-                  {p.desc}
-                </p>
-              </motion.div>
-            ))}
+          <div 
+            ref={pillarsRef}
+            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}
+          >
+            {pillars.map((p, i) => {
+              const flight = pillarFlights[i]
+              return (
+                <motion.div
+                  key={p.title}
+                  style={{
+                    background: 'rgba(13,13,22,0.8)',
+                    border: `1px solid ${p.border}`,
+                    borderRadius: 16,
+                    padding: '20px',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                  }}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      x: flight.x,
+                      y: flight.y,
+                      rotate: flight.rotate,
+                      scale: flight.scale,
+                    },
+                    visible: {
+                      opacity: 1,
+                      x: 0,
+                      y: 0,
+                      rotate: 0,
+                      scale: 1,
+                    }
+                  }}
+                  initial="hidden"
+                  animate={isPillarsVisible ? "visible" : "hidden"}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 22,
+                    damping: 12,
+                    mass: 1.2,
+                    delay: flight.delay,
+                  }}
+                  whileHover={{ y: -4, boxShadow: `0 20px 40px ${p.bg}` }}
+                >
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    background: p.bg, border: `1px solid ${p.border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 14,
+                  }}>
+                    <p.icon size={18} color={p.color} />
+                  </div>
+                  <h3 style={{
+                    fontFamily: 'Space Grotesk, sans-serif', fontSize: 14,
+                    fontWeight: 600, color: '#fff', marginBottom: 8,
+                  }}>
+                    {p.title}
+                  </h3>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif', fontSize: 12.5,
+                    lineHeight: 1.65, color: 'rgba(161,161,170,0.65)',
+                  }}>
+                    {p.desc}
+                  </p>
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </div>

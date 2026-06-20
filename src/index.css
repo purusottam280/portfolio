@@ -351,3 +351,51 @@ body {
   }
   html { scroll-behavior: auto; }
 }
+
+/* Force canvas elements to be transparent by default to prevent white loading flash */
+canvas {
+  background: transparent !important;
+}
+
+/* Responsive 3D WebGL element positioning */
+.hero-3d-container {
+  position: absolute;
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 600px;
+  height: 600px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@media (max-width: 1400px) {
+  .hero-3d-container {
+    width: 500px;
+    height: 500px;
+    right: -2%;
+  }
+}
+
+@media (max-width: 1200px) {
+  .hero-3d-container {
+    width: 420px;
+    height: 420px;
+    right: 0%;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* Position behind text on smaller/touch screens with reduced opacity */
+  .hero-3d-container {
+    left: 50%;
+    top: 45%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    height: 380px;
+    opacity: 0.18;
+    z-index: 0;
+  }
+}
+

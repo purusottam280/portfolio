@@ -1,5 +1,5 @@
 import { motion, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef, useState, useMemo } from 'react'
 
 const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
@@ -124,6 +124,25 @@ export default function Skills() {
   const progressRef = useRef<HTMLDivElement>(null)
   const isVisible = useInView(progressRef, { once: true, margin: '-100px' })
 
+  // Stable random fly-in configurations for skill cards
+  const progressFlights = useMemo(() => {
+    return skillGroups.map((_, gi) => {
+      const angles = [
+        Math.PI * 0.9,  // Left-bottom
+        Math.PI * 1.5,  // Center-bottom
+        Math.PI * 2.1,  // Right-bottom
+      ]
+      const angle = angles[gi % angles.length]
+      const distance = 500 + Math.random() * 200
+      return {
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        rotate: -15 + (gi * 15),
+        scale: 0.8,
+      }
+    })
+  }, [])
+
   return (
     <section
       id="skills"
@@ -200,22 +219,45 @@ export default function Skills() {
           ref={progressRef}
           style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}
         >
-          {skillGroups.map((group, gi) => (
-            <motion.div
-              key={group.category}
-              style={{
-                background: 'rgba(13,13,22,0.85)',
-                border: `1px solid ${group.border}`,
-                borderRadius: 20,
-                padding: '28px 24px',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: gi * 0.15, duration: 0.6, ease: easeSmooth }}
-            >
+          {skillGroups.map((group, gi) => {
+            const flight = progressFlights[gi]
+            return (
+              <motion.div
+                key={group.category}
+                style={{
+                  background: 'rgba(13,13,22,0.85)',
+                  border: `1px solid ${group.border}`,
+                  borderRadius: 20,
+                  padding: '28px 24px',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                }}
+                variants={{
+                  hidden: {
+                    opacity: 0,
+                    x: flight.x,
+                    y: flight.y,
+                    rotate: flight.rotate,
+                    scale: flight.scale,
+                  },
+                  visible: {
+                    opacity: 1,
+                    x: 0,
+                    y: 0,
+                    rotate: 0,
+                    scale: 1,
+                  }
+                }}
+                initial="hidden"
+                animate={isVisible ? "visible" : "hidden"}
+                transition={{
+                  type: 'spring',
+                  stiffness: 22,
+                  damping: 12,
+                  mass: 1.2,
+                  delay: gi * 0.15,
+                }}
+              >
               {/* Category header */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                 <div style={{
@@ -234,7 +276,7 @@ export default function Skills() {
                 <ProgressBar key={skill.name} skill={skill} color={group.color} isVisible={isVisible} />
               ))}
             </motion.div>
-          ))}
+          )})}
         </div>
       </div>
     </section>

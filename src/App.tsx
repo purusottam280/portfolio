@@ -1,4 +1,5 @@
 import { Suspense, lazy } from 'react'
+import { ReactLenis } from 'lenis/react'
 import CustomCursor from './components/CustomCursor'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -29,43 +30,45 @@ function SectionFallback() {
 
 export default function App() {
   return (
-    <div
-      style={{
-        background: '#0A0A0F',
-        minHeight: '100vh',
-        position: 'relative',
-      }}
-    >
-      {/* Custom cursor */}
-      <CustomCursor />
+    <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
+      <div
+        style={{
+          background: '#0A0A0F',
+          minHeight: '100vh',
+          position: 'relative',
+        }}
+      >
+        {/* Custom cursor */}
+        <CustomCursor />
 
-      {/* Navigation */}
-      <Navbar />
+        {/* Navigation */}
+        <Navbar />
 
-      {/* Main content */}
-      <main>
-        {/* Hero loads immediately */}
-        <Hero />
+        {/* Main content */}
+        <main>
+          {/* Hero loads immediately */}
+          <Hero />
 
-        {/* Below-fold sections lazy loaded */}
-        <Suspense fallback={<SectionFallback />}>
-          <About />
-        </Suspense>
+          {/* Below-fold sections lazy loaded */}
+          <Suspense fallback={<SectionFallback />}>
+            <About />
+          </Suspense>
 
-        <Suspense fallback={<SectionFallback />}>
-          <Projects />
-        </Suspense>
+          <Suspense fallback={<SectionFallback />}>
+            <Projects />
+          </Suspense>
 
-        <Suspense fallback={<SectionFallback />}>
-          <Skills />
-        </Suspense>
+          <Suspense fallback={<SectionFallback />}>
+            <Skills />
+          </Suspense>
 
-        <Suspense fallback={<SectionFallback />}>
-          <Contact />
-        </Suspense>
-      </main>
+          <Suspense fallback={<SectionFallback />}>
+            <Contact />
+          </Suspense>
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </ReactLenis>
   )
 }
