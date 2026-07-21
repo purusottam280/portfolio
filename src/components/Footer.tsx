@@ -1,113 +1,82 @@
-import { useEffect, useState } from 'react'
+import { motion } from 'motion/react'
 import { Heart } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { GithubIcon, LinkedinIcon } from './Icons'
 
 export default function Footer() {
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
   return (
-    <footer
-      style={{
-        position: 'relative',
-        padding: '40px 24px',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        background: '#07070B',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: '0 auto',
-          width: '100%',
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 24,
-          textAlign: isMobile ? 'center' : 'left',
-        }}
-      >
-        {/* Brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexDirection: isMobile ? 'column' : 'row' }}>
-          <span
-            className="gradient-text"
-            style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontWeight: 700,
-              fontSize: '1.125rem',
-            }}
-          >
-            Purusottam Patel
-          </span>
-          {!isMobile && <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.875rem' }}>·</span>}
-          <span
-            style={{
-              fontFamily: 'Inter, sans-serif',
-              color: 'rgba(255,255,255,0.4)',
-              fontSize: '0.875rem',
-            }}
-          >
-            AI / ML Engineer
-          </span>
-        </div>
+    <footer className="section-frame" style={{ paddingTop: 48, paddingBottom: 42 }}>
+      <div className="section-grid brutal-panel" style={{ padding: '18px 0 0' }}>
+        <div className="footer-line" style={{ marginBottom: 28 }} />
 
-        {/* Made with */}
-        <p
+        <div
           style={{
-            color: 'rgba(161,161,170,0.4)',
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '0.75rem',
             display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 4,
-            margin: 0,
+            justifyContent: 'space-between',
+            gap: 18,
           }}
         >
-          Built with <Heart size={12} color="#6366F1" fill="#6366F1" /> using React + Vite + Framer Motion
-        </p>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', letterSpacing: '-0.04em', marginBottom: 6 }}>
+              Purusottam Patel
+            </div>
+            <div className="project-meta">AI Engineer building production-first systems</div>
+          </div>
 
-        {/* Socials */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          {[
-            { Icon: GithubIcon, href: 'https://github.com/purusottam280', label: 'GitHub' },
-            { Icon: LinkedinIcon, href: 'https://linkedin.com/in/purusottampatel', label: 'LinkedIn' },
-          ].map(({ Icon, href, label }) => (
-            <motion.a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={label}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease',
-              }}
-              whileHover={{
-                scale: 1.1,
-                backgroundColor: 'rgba(99,102,241,0.15)',
-                borderColor: 'rgba(99,102,241,0.35)',
-              }}
-            >
-              <Icon size={14} color="rgba(255,255,255,0.5)" />
-            </motion.a>
-          ))}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <a href="#about" className="button-ghost brutal-panel" style={{ padding: '11px 16px' }}>About</a>
+            <a href="#projects" className="button-ghost brutal-panel" style={{ padding: '11px 16px' }}>Projects</a>
+            <a href="#contact" className="button-ghost brutal-panel" style={{ padding: '11px 16px' }}>Contact</a>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {[
+              { Icon: GithubIcon, href: 'https://github.com/purusottam280', label: 'GitHub' },
+              { Icon: LinkedinIcon, href: 'https://linkedin.com/in/purusottampatel', label: 'LinkedIn' },
+            ].map(({ Icon, href, label }) => (
+              <motion.a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                whileHover={{ y: -2 }}
+                className="glass-panel brutal-panel"
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 10,
+                  display: 'grid',
+                  placeItems: 'center',
+                  textDecoration: 'none',
+                }}
+              >
+                <Icon size={16} color="rgba(247,249,252,0.74)" />
+              </motion.a>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            marginTop: 24,
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            color: 'rgba(247,249,252,0.52)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.72rem',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+          }}
+        >
+          <span>Built with React, Motion, and a lot of iteration.</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            Crafted with <Heart size={12} color="var(--accent-2)" fill="var(--accent-2)" /> from India
+          </span>
         </div>
       </div>
     </footer>

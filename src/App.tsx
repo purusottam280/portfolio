@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react'
-import { ReactLenis } from 'lenis/react'
+import { motion, useScroll, useSpring } from 'motion/react'
 import CustomCursor from './components/CustomCursor'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -28,47 +28,39 @@ function SectionFallback() {
   )
 }
 
+function ScrollTelemetry() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 180, damping: 30, mass: 0.22 })
+
+  return <motion.div className="scroll-telemetry" style={{ scaleX }} aria-hidden="true" />
+}
+
 export default function App() {
   return (
-    <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
-      <div
-        style={{
-          background: '#0A0A0F',
-          minHeight: '100vh',
-          position: 'relative',
-        }}
-      >
-        {/* Custom cursor */}
-        <CustomCursor />
+    <div className="site-shell">
+      <ScrollTelemetry />
+      <div className="page-noise" />
+      <CustomCursor />
+      <Navbar />
+      <main>
+        <Hero />
+        <Suspense fallback={<SectionFallback />}>
+          <About />
+        </Suspense>
 
-        {/* Navigation */}
-        <Navbar />
+        <Suspense fallback={<SectionFallback />}>
+          <Projects />
+        </Suspense>
 
-        {/* Main content */}
-        <main>
-          {/* Hero loads immediately */}
-          <Hero />
+        <Suspense fallback={<SectionFallback />}>
+          <Skills />
+        </Suspense>
 
-          {/* Below-fold sections lazy loaded */}
-          <Suspense fallback={<SectionFallback />}>
-            <About />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Projects />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Skills />
-          </Suspense>
-
-          <Suspense fallback={<SectionFallback />}>
-            <Contact />
-          </Suspense>
-        </main>
-
-        <Footer />
-      </div>
-    </ReactLenis>
+        <Suspense fallback={<SectionFallback />}>
+          <Contact />
+        </Suspense>
+      </main>
+      <Footer />
+    </div>
   )
 }

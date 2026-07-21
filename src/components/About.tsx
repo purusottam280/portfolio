@@ -1,323 +1,174 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { motion, useInView } from 'framer-motion'
-import { Brain, Zap, Code2, Layers } from 'lucide-react'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { motion } from 'motion/react'
+import { Brain, Compass, Layers3, Workflow } from 'lucide-react'
 
-gsap.registerPlugin(ScrollTrigger)
-
-const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
-
-const stats = [
-  { value: '10+', label: 'AI Projects Built' },
-  { value: '5+', label: 'Agent Frameworks' },
-  { value: '3+', label: 'Years Experience' },
-  { value: '100%', label: 'Autonomous Focus' },
-]
-
-const pillars = [
+const principles = [
   {
     icon: Brain,
-    title: 'Agentic AI Systems',
-    desc: 'Designing autonomous multi-agent pipelines with LangGraph, CrewAI, and AutoGen that plan, reason, and self-correct without human intervention.',
-    color: '#6366F1',
-    bg: 'rgba(99,102,241,0.1)',
-    border: 'rgba(99,102,241,0.18)',
+    title: 'Systems first',
+    desc: 'Every model sits inside a product loop, with context, guardrails, and clear UX.',
   },
   {
-    icon: Layers,
-    title: 'RAG Architectures',
-    desc: 'Building production-grade Retrieval-Augmented Generation systems with hybrid search, re-ranking, and multilingual capabilities.',
-    color: '#06B6D4',
-    bg: 'rgba(6,182,212,0.08)',
-    border: 'rgba(6,182,212,0.18)',
+    icon: Workflow,
+    title: 'Composable flows',
+    desc: 'I break AI products into small orchestration layers that are easier to scale and debug.',
   },
   {
-    icon: Zap,
-    title: 'LLM Fine-tuning',
-    desc: 'Adapting and aligning large language models via LoRA, RLHF, and instruction tuning for domain-specific applications.',
-    color: '#8B5CF6',
-    bg: 'rgba(139,92,246,0.08)',
-    border: 'rgba(139,92,246,0.18)',
+    icon: Layers3,
+    title: 'Interface matters',
+    desc: 'A good AI stack should feel calm to use, even if the logic underneath is complex.',
   },
   {
-    icon: Code2,
-    title: 'AI Engineering',
-    desc: 'Deploying scalable AI APIs with FastAPI, Docker, and cloud infrastructure — bridging the gap between research and production.',
-    color: '#06B6D4',
-    bg: 'rgba(6,182,212,0.08)',
-    border: 'rgba(6,182,212,0.18)',
+    icon: Compass,
+    title: 'Outcome driven',
+    desc: 'I optimize for measurable workflows, not just impressive demos or flashy model usage.',
   },
+]
+
+const stats = [
+  { value: '10+', label: 'projects shipped' },
+  { value: '5+', label: 'agent frameworks' },
+  { value: '3+', label: 'years in ML' },
+  { value: '100%', label: 'production bias' },
 ]
 
 export default function About() {
-  const [isMobile, setIsMobile] = useState(false)
-  const containerRef = useRef<HTMLElement>(null)
-  const pillarsRef = useRef<HTMLDivElement>(null)
-  const isPillarsVisible = useInView(pillarsRef, { once: true, margin: '-100px' })
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 992)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useGSAP(() => {
-    gsap.to('.aurora-orb-about', {
-      yPercent: 100,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      }
-    })
-  }, { scope: containerRef })
-
-  // Stable random fly-in configurations for About cards
-  const pillarFlights = useMemo(() => {
-    return pillars.map((_, i) => {
-      const angles = [
-        Math.PI * 0.8,  // Left-bottom
-        Math.PI * 0.2,  // Top-right
-        Math.PI * 1.2,  // Bottom-left
-        Math.PI * 1.8,  // Bottom-right
-      ]
-      const angle = angles[i % angles.length]
-      const distance = 500 + Math.random() * 200
-      return {
-        x: Math.cos(angle) * distance,
-        y: Math.sin(angle) * distance,
-        rotate: -20 + (i * 12),
-        scale: 0.8,
-        delay: i * 0.12 + 0.2,
-      }
-    })
-  }, [])
-
   return (
-    <section
-      id="about"
-      ref={containerRef}
-      style={{ position: 'relative', padding: '112px 24px', overflow: 'hidden' }}
-    >
-      {/* Aurora */}
-      <div
-        className="aurora-orb aurora-orb-about"
-        style={{
-          width: 500, height: 500,
-          background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%)',
-          bottom: '-10%', right: '-5%',
-          animation: 'auroraFloat2 20s ease-in-out infinite',
-        }}
-      />
+    <section id="about" className="section-frame">
+      <div className="ambient-orb orb-b" style={{ top: '-8%', right: '-10%' }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* ── Section Header (centered) ─── */}
+      <div className="section-grid">
         <motion.div
-          style={{ textAlign: 'center', marginBottom: 72 }}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7, ease: easeSmooth }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.6 }}
+          style={{ maxWidth: 720, marginBottom: 34 }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <div style={{ width: 24, height: 1, background: 'rgba(99,102,241,0.5)' }} />
-            <span style={{
-              fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
-              letterSpacing: '0.14em', textTransform: 'uppercase' as const,
-              background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>About Me</span>
-            <div style={{ width: 24, height: 1, background: 'rgba(6,182,212,0.5)' }} />
-          </div>
-
-          <h2 style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
-            fontWeight: 700, color: '#fff', lineHeight: 1.15, marginBottom: 16,
-          }}>
-            Engineering intelligence,{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>
-              one agent at a time
+          <div className="section-kicker" style={{ marginBottom: 18 }}>About</div>
+          <h2 className="section-title" style={{ maxWidth: 760, marginBottom: 18 }}>
+            I treat AI engineering like
+            <span style={{ display: 'block', background: 'linear-gradient(135deg, #fff 0%, #67e8f9 45%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              product design for intelligent systems.
             </span>
           </h2>
-
-          <div style={{
-            width: 56, height: 3,
-            background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-            borderRadius: 2, margin: '0 auto',
-            boxShadow: '0 0 10px rgba(99,102,241,0.5)',
-          }} />
+          <p className="section-copy" style={{ maxWidth: 680 }}>
+            I build multi-agent workflows, RAG products, and automation tools that balance speed,
+            reliability, and clean interfaces. The goal is not to make AI look complex. It is to make
+            complex systems feel simple, controlled, and polished.
+          </p>
         </motion.div>
 
-        {/* ── Two-column layout ─── */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          gap: isMobile ? 40 : 64,
-          alignItems: 'start',
-        }}>
-
-          {/* LEFT: Bio + Stats Card */}
-          <div
-            className="glass-card"
-            style={{
-              background: 'rgba(13,13,22,0.6)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 24,
-              padding: isMobile ? '24px 20px' : '40px',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+            gap: 16,
+            alignItems: 'stretch',
+          }}
+        >
+          <motion.div
+            className="glass-panel-strong holo-border brutal-panel"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-120px' }}
+            transition={{ duration: 0.7 }}
+            style={{ borderRadius: 18, padding: 24, minHeight: '100%', transform: 'skewX(-0.6deg)' }}
           >
+            <div className="project-meta" style={{ marginBottom: 14 }}>Field notes</div>
+            <div style={{ display: 'grid', gap: 18 }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', letterSpacing: '-0.05em', marginBottom: 8 }}>Purusottam Patel</div>
+                <p className="section-copy" style={{ marginBottom: 0 }}>
+                  AI/ML Engineer focused on turning model capability into products people can actually ship,
+                  trust, and reuse.
+                </p>
+              </div>
 
-            <motion.p
-              style={{
-                fontFamily: 'Inter, sans-serif', fontSize: 16, lineHeight: 1.8,
-                color: 'rgba(200,200,215,0.8)', marginBottom: 20,
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1, duration: 0.7, ease: easeSmooth }}
-            >
-              I'm <strong style={{ color: '#fff', fontWeight: 600 }}>Purusottam Patel</strong>, an AI/ML Engineer &amp; Agentic Systems Builder passionate about building AI systems that go beyond
-              simple prompt-response — systems that plan, execute, and adapt autonomously.
-            </motion.p>
-
-            <motion.p
-              style={{
-                fontFamily: 'Inter, sans-serif', fontSize: 15, lineHeight: 1.8,
-                color: 'rgba(161,161,170,0.7)', marginBottom: 40,
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2, duration: 0.7, ease: easeSmooth }}
-            >
-              My work spans Hiring Intelligence &amp; ATS automation platforms, multilingual document
-              retrieval systems (RAG), and agentic travel itinerary planning. I bridge the gap
-              between cutting-edge research and production-ready deployment.
-            </motion.p>
-
-            {/* Stats grid */}
-            <motion.div
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.7, ease: easeSmooth }}
-            >
-              {stats.map(s => (
+              <div
+                style={{
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  position: 'relative',
+                }}
+              >
+                <img
+                  src="/profile.jpg"
+                  alt="Purusottam Patel"
+                  style={{
+                    width: '100%',
+                    height: 300,
+                    objectFit: 'cover',
+                    objectPosition: 'center top',
+                    filter: 'contrast(1.04) saturate(1.06)',
+                  }}
+                />
                 <div
-                  key={s.label}
                   style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(99,102,241,0.15)',
-                    borderRadius: 16,
-                    padding: '20px 16px',
-                    textAlign: 'center',
-                    backdropFilter: 'blur(12px)',
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(4,5,7,0.08) 0%, rgba(4,5,7,0.6) 100%)',
                   }}
-                >
-                  <div style={{
-                    fontFamily: 'Space Grotesk, sans-serif', fontSize: 30, fontWeight: 700,
-                    background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                    marginBottom: 4,
-                  }}>
-                    {s.value}
-                  </div>
-                  <div style={{
-                    fontFamily: 'Inter, sans-serif', fontSize: 12,
-                    color: 'rgba(161,161,170,0.6)',
-                  }}>
-                    {s.label}
-                  </div>
+                />
+                <div style={{ position: 'absolute', left: 16, right: 16, bottom: 16, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {['Autonomy', 'Retrieval', 'Deployment'].map(tag => (
+                    <span key={tag} className="tag-chip">{tag}</span>
+                  ))}
                 </div>
-              ))}
-            </motion.div>
-          </div>
+              </div>
+            </div>
+          </motion.div>
 
-          {/* RIGHT: Expertise pillars */}
-          <div 
-            ref={pillarsRef}
-            style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}
-          >
-            {pillars.map((p, i) => {
-              const flight = pillarFlights[i]
-              return (
+          <div style={{ display: 'grid', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
+              {stats.map(stat => (
                 <motion.div
-                  key={p.title}
-                  style={{
-                    background: 'rgba(13,13,22,0.8)',
-                    border: `1px solid ${p.border}`,
-                    borderRadius: 16,
-                    padding: '20px',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                  }}
-                  variants={{
-                    hidden: {
-                      opacity: 0,
-                      x: flight.x,
-                      y: flight.y,
-                      rotate: flight.rotate,
-                      scale: flight.scale,
-                    },
-                    visible: {
-                      opacity: 1,
-                      x: 0,
-                      y: 0,
-                      rotate: 0,
-                      scale: 1,
-                    }
-                  }}
-                  initial="hidden"
-                  animate={isPillarsVisible ? "visible" : "hidden"}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 22,
-                    damping: 12,
-                    mass: 1.2,
-                    delay: flight.delay,
-                  }}
-                  whileHover={{ y: -4, boxShadow: `0 20px 40px ${p.bg}` }}
+                  key={stat.label}
+                  className="glass-panel holo-border brutal-panel"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-100px' }}
+                  transition={{ duration: 0.5 }}
+                  style={{ borderRadius: 14, padding: 20 }}
                 >
-                  <div style={{
-                    width: 40, height: 40, borderRadius: 12,
-                    background: p.bg, border: `1px solid ${p.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    marginBottom: 14,
-                  }}>
-                    <p.icon size={18} color={p.color} />
-                  </div>
-                  <h3 style={{
-                    fontFamily: 'Space Grotesk, sans-serif', fontSize: 14,
-                    fontWeight: 600, color: '#fff', marginBottom: 8,
-                  }}>
-                    {p.title}
-                  </h3>
-                  <p style={{
-                    fontFamily: 'Inter, sans-serif', fontSize: 12.5,
-                    lineHeight: 1.65, color: 'rgba(161,161,170,0.65)',
-                  }}>
-                    {p.desc}
-                  </p>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '-0.05em', marginBottom: 6 }}>{stat.value}</div>
+                  <div className="project-meta">{stat.label}</div>
                 </motion.div>
-              )
-            })}
+              ))}
+            </div>
+
+            <motion.div
+              className="glass-panel-strong holo-border brutal-panel"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-100px' }}
+              transition={{ duration: 0.7 }}
+              style={{ borderRadius: 18, padding: 24, transform: 'skewX(0.4deg)' }}
+            >
+              <div className="project-meta" style={{ marginBottom: 16 }}>Operating principles</div>
+              <div style={{ display: 'grid', gap: 12 }}>
+                {principles.map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="glass-panel brutal-panel" style={{ borderRadius: 12, padding: 16, display: 'grid', gridTemplateColumns: '36px 1fr', gap: 14, alignItems: 'start' }}>
+                    <div
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 12,
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: 'rgba(34,211,238,0.08)',
+                        border: '1px solid rgba(34,211,238,0.14)',
+                      }}
+                    >
+                      <Icon size={16} color="var(--accent-2)" />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, marginBottom: 4 }}>{title}</div>
+                      <div style={{ color: 'rgba(247,249,252,0.68)', lineHeight: 1.6, fontSize: '0.95rem' }}>{desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>

@@ -1,283 +1,169 @@
-import { motion, useInView } from 'framer-motion'
-import { useRef, useState, useMemo } from 'react'
-
-const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
+import { motion } from 'motion/react'
 
 const skillGroups = [
   {
-    category: 'Foundations & ML',
-    color: '#6366F1',
-    bg: 'rgba(99,102,241,0.06)',
-    border: 'rgba(99,102,241,0.15)',
+    title: 'Foundations and ML',
+    accent: '#7c3aed',
+    description: 'Core machine learning and computer vision toolkit.',
     skills: [
       { name: 'Python', level: 95 },
-      { name: 'ML & Data Analysis (NumPy, Pandas, Scikit-learn)', level: 90 },
-      { name: 'Deep Learning (PyTorch, TensorFlow)', level: 82 },
-      { name: 'Computer Vision (OpenCV, YOLO)', level: 83 },
-      { name: 'NLP (SpaCy, NLTK)', level: 85 },
+      { name: 'ML and Data Analysis', level: 90 },
+      { name: 'Deep Learning', level: 82 },
+      { name: 'Computer Vision', level: 83 },
+      { name: 'NLP', level: 85 },
     ],
   },
   {
-    category: 'GenAI & Agentic Systems',
-    color: '#06B6D4',
-    bg: 'rgba(6,182,212,0.05)',
-    border: 'rgba(6,182,212,0.15)',
+    title: 'GenAI and Agents',
+    accent: '#22d3ee',
+    description: 'Agent orchestration, retrieval, and LLM application design.',
     skills: [
-      { name: 'LLMs & GenAI (GPT-4, LLaMA, Gemini)', level: 95 },
+      { name: 'LLMs and GenAI', level: 95 },
       { name: 'LangGraph / LangChain', level: 92 },
       { name: 'CrewAI / AutoGen', level: 82 },
-      { name: 'RAG & Vector Databases (Pinecone, ChromaDB)', level: 90 },
-      { name: 'Hugging Face Transformers', level: 87 },
+      { name: 'RAG and Vector DBs', level: 90 },
+      { name: 'Transformers', level: 87 },
     ],
   },
   {
-    category: 'Web, APIs & MLOps',
-    color: '#8B5CF6',
-    bg: 'rgba(139,92,246,0.05)',
-    border: 'rgba(139,92,246,0.15)',
+    title: 'APIs and Delivery',
+    accent: '#f59e0b',
+    description: 'Shipping systems that are deployable and maintainable.',
     skills: [
       { name: 'FastAPI / Flask', level: 88 },
       { name: 'Streamlit / Gradio', level: 85 },
-      { name: 'MLOps & CI/CD (MLflow, GitHub Actions)', level: 78 },
+      { name: 'MLOps / CI/CD', level: 78 },
       { name: 'Docker / Kubernetes', level: 75 },
-      { name: 'Databases (MySQL, PostgreSQL, Git)', level: 85 },
+      { name: 'Databases', level: 85 },
     ],
   },
 ]
 
-const orbSkills = [
-  { name: 'Python', color: '#6366F1', size: 70, delay: 0 },
-  { name: 'PyTorch', color: '#EF4444', size: 65, delay: 0.4 },
-  { name: 'YOLOv8', color: '#F97316', size: 62, delay: 0.8 },
-  { name: 'HuggingFace', color: '#FBBF24', size: 60, delay: 1.2 },
-  { name: 'GPT-4', color: '#8B5CF6', size: 64, delay: 0.2 },
-  { name: 'LangGraph', color: '#6366F1', size: 72, delay: 0.6 },
-  { name: 'CrewAI', color: '#8B5CF6', size: 62, delay: 1.0 },
-  { name: 'RAG', color: '#06B6D4', size: 68, delay: 0.3 },
-  { name: 'ChromaDB', color: '#6366F1', size: 58, delay: 0.7 },
-  { name: 'FastAPI', color: '#06B6D4', size: 60, delay: 1.1 },
-  { name: 'Streamlit', color: '#06B6D4', size: 60, delay: 0.5 },
-  { name: 'Docker', color: '#06B6D4', size: 58, delay: 0.9 },
+const chips = [
+  'Python',
+  'PyTorch',
+  'LangGraph',
+  'RAG',
+  'FastAPI',
+  'Docker',
+  'Pinecone',
+  'TensorFlow',
+  'Streamlit',
+  'CrewAI',
+  'OpenCV',
+  'GitHub Actions',
 ]
 
-function SkillOrb({ orb, index }: { orb: typeof orbSkills[0]; index: number }) {
-  const [hovered, setHovered] = useState(false)
-  return (
-    <motion.div
-      className="skill-orb"
-      style={{
-        width: hovered ? orb.size * 1.18 : orb.size,
-        height: hovered ? orb.size * 1.18 : orb.size,
-        borderRadius: '50%',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'Inter, sans-serif',
-        fontWeight: 600,
-        color: '#fff',
-        fontSize: hovered ? '0.68rem' : '0.6rem',
-        background: `radial-gradient(circle at 35% 35%, ${orb.color}55, ${orb.color}22)`,
-        border: `1px solid ${orb.color}44`,
-        boxShadow: hovered ? `0 0 28px ${orb.color}60, 0 0 56px ${orb.color}20` : `0 0 10px ${orb.color}30`,
-        animationDelay: `${orb.delay}s`,
-        cursor: 'default',
-        transition: 'width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, font-size 0.3s ease',
-        willChange: 'transform',
-        flexShrink: 0,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      initial={{ opacity: 0, scale: 0.5 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
-    >
-      {orb.name}
-    </motion.div>
-  )
-}
-
-function ProgressBar({ skill, color, isVisible }: { skill: { name: string; level: number }; color: string; isVisible: boolean }) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: 'rgba(220,220,235,0.8)', fontWeight: 500 }}>
-          {skill.name}
-        </span>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color, fontWeight: 600 }}>
-          {skill.level}%
-        </span>
-      </div>
-      <div style={{ height: 6, borderRadius: 4, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-        <div
-          className="progress-bar-fill"
-          style={{
-            width: isVisible ? `${skill.level}%` : '0%',
-            background: `linear-gradient(90deg, ${color}, ${color}99)`,
-            boxShadow: `0 0 8px ${color}55`,
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
 export default function Skills() {
-  const progressRef = useRef<HTMLDivElement>(null)
-  const isVisible = useInView(progressRef, { once: true, margin: '-100px' })
-
-  // Stable random fly-in configurations for skill cards
-  const progressFlights = useMemo(() => {
-    return skillGroups.map((_, gi) => {
-      const angles = [
-        Math.PI * 0.9,  // Left-bottom
-        Math.PI * 1.5,  // Center-bottom
-        Math.PI * 2.1,  // Right-bottom
-      ]
-      const angle = angles[gi % angles.length]
-      const distance = 500 + Math.random() * 200
-      return {
-        x: Math.cos(angle) * distance,
-        y: Math.sin(angle) * distance,
-        rotate: -15 + (gi * 15),
-        scale: 0.8,
-      }
-    })
-  }, [])
-
   return (
-    <section
-      id="skills"
-      style={{ position: 'relative', padding: '112px 24px', overflow: 'hidden' }}
-    >
-      <div
-        className="aurora-orb"
-        style={{
-          width: 500, height: 500,
-          background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)',
-          top: '5%', right: '-5%',
-          animation: 'auroraFloat3 24s ease-in-out infinite',
-        }}
-      />
+    <section id="skills" className="section-frame">
+      <div className="ambient-orb orb-c" style={{ right: '-10%', top: '-6%' }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-
-        {/* ── Section Header (centered) ─── */}
+      <div className="section-grid">
         <motion.div
-          style={{ textAlign: 'center', marginBottom: 64 }}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: easeSmooth }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.55 }}
+          style={{ maxWidth: 760, marginBottom: 28 }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <div style={{ width: 24, height: 1, background: 'rgba(99,102,241,0.5)' }} />
-            <span style={{
-              fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
-              letterSpacing: '0.14em', textTransform: 'uppercase' as const,
-              background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>Skills</span>
-            <div style={{ width: 24, height: 1, background: 'rgba(6,182,212,0.5)' }} />
-          </div>
-
-          <h2 style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
-            fontWeight: 700, color: '#fff', lineHeight: 1.15, marginBottom: 16,
-          }}>
-            The tech stack{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>
-              powering my work
+          <div className="section-kicker" style={{ marginBottom: 18 }}>Capabilities</div>
+          <h2 className="section-title" style={{ marginBottom: 16 }}>
+            The stack that powers
+            <span style={{ display: 'block', background: 'linear-gradient(135deg, #fff 0%, #22d3ee 52%, #f59e0b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              the whole machine.
             </span>
           </h2>
-
-          <div style={{
-            width: 56, height: 3,
-            background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-            borderRadius: 2, margin: '0 auto',
-            boxShadow: '0 0 10px rgba(99,102,241,0.5)',
-          }} />
+          <p className="section-copy" style={{ maxWidth: 640 }}>
+            A practical stack across ML, agentic orchestration, APIs, and deployment. Each layer is optimized
+            to work together so the end product feels unified.
+          </p>
         </motion.div>
 
-        {/* ── Floating Orbs ─── */}
         <motion.div
-          style={{ display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'center', marginBottom: 72 }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.55 }}
+          className="glass-panel holo-border brutal-panel"
+          style={{ borderRadius: 16, padding: 18, marginBottom: 18 }}
         >
-          {orbSkills.map((orb, i) => (
-            <SkillOrb key={orb.name} orb={orb} index={i} />
-          ))}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {chips.map(chip => (
+              <span key={chip} className="tag-chip">
+                {chip}
+              </span>
+            ))}
+          </div>
         </motion.div>
 
-        {/* ── Progress Bars ─── */}
-        <div
-          ref={progressRef}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}
-        >
-          {skillGroups.map((group, gi) => {
-            const flight = progressFlights[gi]
-            return (
-              <motion.div
-                key={group.category}
-                style={{
-                  background: 'rgba(13,13,22,0.85)',
-                  border: `1px solid ${group.border}`,
-                  borderRadius: 20,
-                  padding: '28px 24px',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                }}
-                variants={{
-                  hidden: {
-                    opacity: 0,
-                    x: flight.x,
-                    y: flight.y,
-                    rotate: flight.rotate,
-                    scale: flight.scale,
-                  },
-                  visible: {
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                    rotate: 0,
-                    scale: 1,
-                  }
-                }}
-                initial="hidden"
-                animate={isVisible ? "visible" : "hidden"}
-                transition={{
-                  type: 'spring',
-                  stiffness: 22,
-                  damping: 12,
-                  mass: 1.2,
-                  delay: gi * 0.15,
-                }}
-              >
-              {/* Category header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-                <div style={{
-                  width: 4, height: 22, borderRadius: 2,
-                  background: `linear-gradient(180deg, ${group.color}, ${group.color}44)`,
-                }} />
-                <h3 style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
-                  fontSize: 15, fontWeight: 600, color: '#fff',
-                }}>
-                  {group.category}
-                </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 18 }}>
+          {skillGroups.map((group, index) => (
+            <motion.div
+              key={group.title}
+              className="skill-card glass-panel-strong holo-border brutal-panel"
+              initial={{ opacity: 0, y: 24, scale: 0.98 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: '-120px' }}
+              transition={{ duration: 0.65, delay: index * 0.08 }}
+              whileHover={{ y: -6 }}
+              style={{ padding: 22, transform: 'skewX(-0.4deg)' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 18 }}>
+                <div>
+                  <div className="project-meta" style={{ marginBottom: 10 }}>{group.description}</div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '-0.04em', marginBottom: 0 }}>{group.title}</h3>
+                </div>
+                <div style={{ width: 14, height: 14, borderRadius: '50%', background: group.accent, boxShadow: `0 0 20px ${group.accent}88`, flexShrink: 0, marginTop: 6 }} />
               </div>
 
-              {group.skills.map(skill => (
-                <ProgressBar key={skill.name} skill={skill} color={group.color} isVisible={isVisible} />
-              ))}
+              <div style={{ display: 'grid', gap: 14 }}>
+                {group.skills.map(skill => (
+                  <div key={skill.name}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+                      <span style={{ color: 'rgba(247,249,252,0.86)', fontSize: '0.94rem' }}>{skill.name}</span>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.1em', color: group.accent }}>
+                        {skill.level}%
+                      </span>
+                    </div>
+                    <div className="skill-meter">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${skill.level}%` }}
+                        viewport={{ once: true, margin: '-120px' }}
+                        transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ width: `${skill.level}%`, background: `linear-gradient(90deg, ${group.accent}, rgba(255,255,255,0.72))` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </motion.div>
-          )})}
+          ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.55 }}
+          className="glass-panel holo-border brutal-panel"
+          style={{ borderRadius: 16, padding: 22, marginTop: 18 }}
+        >
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 16, alignItems: 'center' }}>
+            <div>
+              <div className="project-meta" style={{ marginBottom: 8 }}>How I work</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', letterSpacing: '-0.04em' }}>
+                I like systems that are fast to build, clear to understand, and hard to break.
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {['Design', 'Build', 'Test', 'Ship'].map(step => (
+                <span key={step} className="metric-pill">{step}</span>
+              ))}
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

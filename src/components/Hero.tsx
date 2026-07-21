@@ -1,420 +1,247 @@
-import { useEffect, useState, useMemo } from 'react'
-import Particles, { ParticlesProvider } from '@tsparticles/react'
-import { loadSlim } from '@tsparticles/slim'
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { ChevronDown } from 'lucide-react'
 import { GithubIcon, LinkedinIcon } from './Icons'
-import type { Engine } from '@tsparticles/engine'
-import CanvasBackground from './CanvasBackground'
 
-const ROLES = [
-  'AI / ML Engineer',
-  'Agentic Systems Builder',
-  'Multi-Agent Architect',
-  'RAG Pipeline Specialist',
-  'LLM Applications Developer',
+const roles = [
+  'AI Engineer',
+  'Agentic System Designer',
+  'RAG Architect',
+  'Production ML Builder',
 ]
 
+const metrics = [
+  { value: '10+', label: 'projects shipped' },
+  { value: '5+', label: 'agent stacks' },
+  { value: '1', label: 'focus: production AI' },
+]
 
-
-function useTypewriter(words: string[], speed = 75, pauseMs = 2200) {
-  const [idx, setIdx] = useState(0)
-  const [charIdx, setCharIdx] = useState(0)
-  const [deleting, setDeleting] = useState(false)
-
-  useEffect(() => {
-    const current = words[idx]
-    let timeout: ReturnType<typeof setTimeout>
-
-    if (!deleting && charIdx < current.length) {
-      timeout = setTimeout(() => setCharIdx(c => c + 1), speed)
-    } else if (!deleting && charIdx === current.length) {
-      timeout = setTimeout(() => setDeleting(true), pauseMs)
-    } else if (deleting && charIdx > 0) {
-      timeout = setTimeout(() => setCharIdx(c => c - 1), speed / 2)
-    } else {
-      timeout = setTimeout(() => {
-        setDeleting(false)
-        setCharIdx(0)
-        setIdx(i => (i + 1) % words.length)
-      }, 0)
-    }
-
-    return () => clearTimeout(timeout)
-  }, [charIdx, deleting, idx, words, speed, pauseMs])
-
-  return words[idx].slice(0, charIdx)
-}
-
-
-const particleOptions = {
-  fullScreen: false,
-  background: { color: { value: 'transparent' } },
-  fpsLimit: 60,
-  particles: {
-    number: { value: 70, density: { enable: true } },
-    color: { value: ['#6366F1', '#06B6D4', '#8B5CF6'] },
-    shape: { type: 'circle' },
-    opacity: {
-      value: { min: 0.2, max: 0.6 },
-      animation: { enable: true, speed: 1 },
-    },
-    size: { value: { min: 1, max: 3 } },
-    links: {
-      enable: true,
-      color: '#6366F1',
-      opacity: 0.25,
-      width: 1,
-      distance: 140,
-    },
-    move: {
-      enable: true,
-      speed: 0.8,
-      direction: 'none' as const,
-      random: true,
-      straight: false,
-      outModes: { default: 'bounce' as const },
-    },
-  },
-  interactivity: {
-    events: {
-      onHover: { enable: true, mode: 'grab' },
-      onClick: { enable: true, mode: 'push' },
-    },
-    modes: {
-      grab: { distance: 140, links: { opacity: 0.5 } },
-      push: { quantity: 2 },
-    },
-  },
-  detectRetina: true,
-} as const
-
-async function initEngine(engine: Engine) {
-  await loadSlim(engine)
-}
+const chips = ['Agentic AI', 'LLM Systems', 'RAG', 'FastAPI', 'Multi-Agent', 'MLOps']
 
 export default function Hero() {
-  const role = useTypewriter(ROLES, 75, 2200)
+  const [roleIndex, setRoleIndex] = useState(0)
 
-  // Avengers Assemble character animations configuration
-  const words = useMemo(() => {
-    return "Purusottam Patel".split(" ").map((word) => {
-      const letters = word.split("").map((char) => {
-        // Random angle for flight path
-        const angle = Math.random() * Math.PI * 2
-        // Random distance to fly in from (well outside screen boundaries)
-        const distance = 800 + Math.random() * 500
-        
-        return {
-          char,
-          initialX: Math.cos(angle) * distance,
-          initialY: Math.sin(angle) * distance,
-          initialRotate: -360 + Math.random() * 720, // Spin -360 to +360 degrees
-          initialScale: 0.1 + Math.random() * 2,     // Dynamic scaling
-          delay: 0.2 + Math.random() * 0.5,         // Staggered assembly times
-        }
-      })
-      return { word, letters }
-    })
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRoleIndex(i => (i + 1) % roles.length)
+    }, 2600)
+    return () => window.clearInterval(timer)
   }, [])
 
   return (
-    <ParticlesProvider init={initEngine}>
-      <section
-        id="hero"
-        style={{
-          position: 'relative',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
-          padding: '80px 24px',
-        }}
-      >
-        {/* Aurora orbs */}
-        <div className="aurora-orb aurora-orb-1" />
-        <div className="aurora-orb aurora-orb-2" />
-        <div className="aurora-orb aurora-orb-3" />
+    <section id="hero" className="section-frame" style={{ minHeight: '100svh', display: 'flex', alignItems: 'center' }}>
+      <div className="ambient-orb orb-a" style={{ top: '4%', left: '-8%' }} />
+      <div className="ambient-orb orb-b" style={{ right: '-10%', top: '8%' }} />
+      <div className="ambient-orb orb-c" style={{ left: '32%', bottom: '-18%' }} />
+      <div className="scanline" />
 
-        {/* Particles background */}
-        <Particles
-          id="tsparticles"
-          options={particleOptions}
-          style={{ position: 'absolute', inset: 0, zIndex: 0 }}
-        />
-
-        {/* 3D WebGL Element positioned absolutely on the right */}
-        <div className="hero-3d-container">
-          <motion.div
-            style={{ width: '100%', height: '100%' }}
-            initial={{ opacity: 0, scale: 0.8, x: 50 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <CanvasBackground style={{ width: '100%', height: '100%' }} />
-          </motion.div>
-        </div>
-
-        {/* Main Wrapper to hold row + scroll down */}
+      <div className="section-grid" style={{ width: '100%' }}>
         <div
           style={{
-            position: 'relative',
-            zIndex: 10,
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.12fr) minmax(320px, 0.88fr)',
+            gap: 'clamp(28px, 5vw, 68px)',
             alignItems: 'center',
           }}
         >
-          {/* Hero Row Content */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '60px',
-              maxWidth: 1300,
-              width: '100%',
-              margin: '0 auto',
-              flexWrap: 'wrap',
-            }}
+          <motion.div
+            initial={{ opacity: 0, x: -76, y: 24, rotate: -2.5, skewX: -1.5 }}
+            animate={{ opacity: 1, x: 0, y: 0, rotate: 0, skewX: 0 }}
+            transition={{ type: 'spring', stiffness: 108, damping: 18, mass: 0.8 }}
+            style={{ position: 'relative', zIndex: 2 }}
           >
-            {/* Left Side: Sexy Profile Image Container */}
-            <motion.div
-              style={{
-                position: 'relative',
-                width: 340,
-                height: 340,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                border: '4px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 0 60px rgba(99, 102, 241, 0.3)',
-                marginBottom: 0,
-                flexShrink: 0,
-              }}
-              initial={{ opacity: 0, scale: 0.8, x: -50 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
-              transition={{ delay: 0.05, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{
-                scale: 1.05,
-                borderColor: 'rgba(99, 102, 241, 0.5)',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 80px rgba(6, 182, 212, 0.5)',
-              }}
-            >
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, transparent 100%)',
-                zIndex: 1,
-                pointerEvents: 'none',
-              }} />
-              <img
-                src="/profile.jpg"
-                alt="Purusottam Patel"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                  filter: 'contrast(1.05) saturate(1.1)',
-                }}
-              />
-            </motion.div>
-
-            {/* Right Side: Texts & CTAs */}
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              textAlign: 'left',
-              flex: 1,
-              minWidth: 320,
-            }}>
-              {/* Availability Badge */}
-              <motion.div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '6px 16px',
-                  borderRadius: 9999,
-                  background: 'rgba(99, 102, 241, 0.12)',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: '#6366F1',
-                  marginBottom: 32,
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: '#4ade80',
-                    display: 'inline-block',
-                    boxShadow: '0 0 8px #4ade80',
-                  }}
-                  className="animate-pulse"
-                />
-                Available for opportunities
-              </motion.div>
-
-              {/* Avengers Assemble Animated Name */}
-              <h1
-                style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
-                  fontSize: 'clamp(2.5rem, 7vw, 5.5rem)',
-                  fontWeight: 700,
-                  color: '#fff',
-                  lineHeight: 1.1,
-                  marginBottom: 16,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {words.map((w, wi) => (
-                  <span
-                    key={wi}
-                    style={{
-                      display: 'inline-block',
-                      whiteSpace: 'nowrap',
-                      marginRight: wi < words.length - 1 ? '0.28em' : 0,
-                    }}
-                  >
-                    {w.letters.map((item, li) => (
-                      <motion.span
-                        key={li}
-                        style={{
-                          display: 'inline-block',
-                          background: 'linear-gradient(135deg, #fff 30%, #a5b4fc 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                          transformStyle: 'preserve-3d',
-                        }}
-                        initial={{
-                          opacity: 0,
-                          x: item.initialX,
-                          y: item.initialY,
-                          rotate: item.initialRotate,
-                          scale: item.initialScale,
-                        }}
-                        animate={{
-                          opacity: 1,
-                          x: 0,
-                          y: 0,
-                          rotate: 0,
-                          scale: 1,
-                        }}
-                        transition={{
-                          type: 'spring',
-                          stiffness: 22,
-                          damping: 12,
-                          mass: 1.2,
-                          delay: item.delay,
-                        }}
-                      >
-                        {item.char}
-                      </motion.span>
-                    ))}
-                  </span>
-                ))}
-              </h1>
-
-              {/* Typewriter text */}
-              <motion.div
-                style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
-                  fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)',
-                  fontWeight: 500,
-                  marginBottom: 24,
-                  minHeight: '2.5rem',
-                }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-              >
-                <span className="gradient-text">{role}</span>
-                <span className="typewriter-cursor" />
-              </motion.div>
-
-              {/* Tagline */}
-              <motion.p
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: 'clamp(0.95rem, 1.8vw, 1.1rem)',
-                  lineHeight: 1.8,
-                  color: 'rgba(200, 200, 215, 0.8)',
-                  maxWidth: 600,
-                  margin: '0 0 40px 0',
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65, duration: 0.6 }}
-              >
-                Building autonomous AI systems that think, adapt, and deliver —
-                from LangGraph agents to multilingual RAG pipelines and beyond.
-              </motion.p>
-
-              {/* CTAs */}
-              <motion.div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'flex-start',
-                  gap: 16,
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8, duration: 0.6 }}
-              >
-              </motion.div>
+            <div className="pill brutal-panel" style={{ marginBottom: 22, width: 'fit-content' }}>
+              <span className="reactor-pulse" style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 14px rgba(233,255,75,0.95)' }} />
+              Node P-01 / online
             </div>
 
-
-          </div>
-
-          {/* Scroll down indicator */}
-          <motion.div
-            style={{
-              marginTop: 96,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 8,
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.8 }}
-          >
-            <span
+            <h1
+              className="section-title"
               style={{
-                fontSize: '0.75rem',
-                color: 'rgba(161, 161, 170, 0.4)',
-                fontFamily: 'Inter, sans-serif',
-                letterSpacing: '0.1em',
+                maxWidth: 860,
+                marginBottom: 18,
+                textTransform: 'uppercase',
               }}
             >
-              scroll down
-            </span>
-            <motion.div
-              animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              AI FOR THE
+              <span className="glitch" data-text="UNSTABLE FUTURE" style={{ display: 'block', color: 'var(--accent)' }}>
+                UNSTABLE FUTURE
+              </span>
+            </h1>
+
+            <div className="signal-rule" style={{ maxWidth: 620, marginBottom: 18 }} />
+
+            <p className="section-copy" style={{ maxWidth: 680, fontSize: '1.05rem', marginBottom: 22 }}>
+              I build agentic systems with teeth: autonomous operators, retrieval engines, and production AI that moves fast under pressure.
+            </p>
+
+            <div style={{ marginBottom: 22, minHeight: 46 }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={roles[roleIndex]}
+                  initial={{ opacity: 0, x: -24, skewX: -8 }}
+                  animate={{ opacity: 1, x: 0, skewX: 0 }}
+                  exit={{ opacity: 0, x: 20, skewX: 8 }}
+                  transition={{ type: 'spring', stiffness: 220, damping: 22, mass: 0.55 }}
+                  className="metric-pill brutal-panel"
+                  style={{ display: 'inline-flex', borderRadius: 10 }}
+                >
+                  <span style={{ color: 'var(--accent)' }}>Signal:</span>
+                  {roles[roleIndex]}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 26 }}>
+              <a href="#projects" className="button-primary">
+                View selected work
+              </a>
+              <a href="/Purusottam_Patel_exp.pdf" target="_blank" rel="noopener noreferrer" className="button-secondary">
+                Download resume
+              </a>
+              <a href="#contact" className="button-ghost">
+                Start a conversation
+              </a>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 14,
+                maxWidth: 760,
+              }}
             >
-              <ChevronDown size={16} color="rgba(161, 161, 170, 0.4)" />
-            </motion.div>
+              {metrics.map((item, index) => (
+                <motion.div
+                  key={item.label}
+                  className="glass-panel holo-border brutal-panel"
+                  initial={{ opacity: 0, y: 30, scaleX: 0.78 }}
+                  animate={{ opacity: 1, y: 0, scaleX: 1 }}
+                  transition={{ delay: 0.34 + index * 0.09, type: 'spring', stiffness: 150, damping: 17 }}
+                  style={{ borderRadius: 14, padding: '18px 16px', transformOrigin: 'left center' }}
+                >
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '-0.06em', lineHeight: 1, marginBottom: 6 }}>
+                    {item.value}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(247,249,252,0.56)' }}>
+                    {item.label}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 96, y: -14, rotate: 3.5, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 90, damping: 16, mass: 0.9, delay: 0.08 }}
+            whileHover={{ y: -8, rotate: -0.6, transition: { type: 'spring', stiffness: 280, damping: 20 } }}
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            <div className="hero-card glass-panel-strong holo-border brutal-panel motion-float" style={{ padding: 18 }}>
+              <div style={{ borderRadius: 16, overflow: 'hidden', position: 'relative', minHeight: 560 }}>
+                <img
+                  src="/profile.jpg"
+                  alt="Purusottam Patel"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    minHeight: 560,
+                    objectFit: 'cover',
+                    objectPosition: 'center top',
+                    filter: 'contrast(1.04) saturate(1.08) brightness(0.94)',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                      'linear-gradient(180deg, rgba(8,9,7,0.04) 0%, rgba(8,9,7,0.82) 100%), linear-gradient(112deg, transparent 0 48%, rgba(233,255,75,0.1) 49%, transparent 50%), radial-gradient(circle at top right, rgba(255,90,31,0.2), transparent 36%)',
+                  }}
+                />
+                <div style={{ position: 'absolute', inset: 0, border: '1px solid rgba(233,255,75,0.2)', borderRadius: 16 }} />
+                <div className="hazard-stripe" style={{ position: 'absolute', top: 0, left: 0, right: 0 }} />
+                <div className="data-strip" style={{ position: 'absolute', top: 24, left: 18, padding: '8px 10px', background: 'rgba(8,9,7,0.78)', border: '1px solid rgba(233,255,75,0.32)' }}>
+                  live visual feed / 2100.07
+                </div>
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 18,
+                    right: 18,
+                    bottom: 18,
+                    display: 'grid',
+                    gap: 12,
+                  }}
+                >
+                  <div className="glass-panel brutal-panel" style={{ borderRadius: 12, padding: '14px 16px' }}>
+                    <div className="project-meta" style={{ marginBottom: 6, color: 'var(--accent)' }}>Active build queue</div>
+                    <div style={{ fontSize: '1.05rem', fontWeight: 600, lineHeight: 1.4 }}>
+                      Building systems people can trust when the interface disappears and the agent takes over.
+                    </div>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="glass-panel brutal-panel" style={{ borderRadius: 12, padding: '14px 16px' }}>
+                      <div className="project-meta" style={{ marginBottom: 8 }}>System loadout</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {['LangGraph', 'FastAPI', 'RAG', 'Docker'].map(tag => (
+                          <span key={tag} className="tag-chip">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="glass-panel brutal-panel" style={{ borderRadius: 12, padding: '14px 16px' }}>
+                      <div className="project-meta" style={{ marginBottom: 8 }}>Channel status</div>
+                      <div style={{ fontSize: '0.98rem', color: 'rgba(247,249,252,0.88)' }}>
+                        Available for select roles and freelance builds.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
-      </section>
-    </ParticlesProvider>
+
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.66, type: 'spring', stiffness: 120, damping: 18 }}
+          style={{
+            marginTop: 28,
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 10,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {chips.map(chip => (
+            <span key={chip} className="pill brutal-panel" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+              {chip}
+            </span>
+          ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.92, type: 'spring', stiffness: 120, damping: 18 }}
+          style={{
+            marginTop: 48,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span className="project-meta">Scroll</span>
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 0.8, repeat: 2, ease: 'easeInOut' }}>
+            <ChevronDown size={18} color="rgba(247,249,252,0.55)" />
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
   )
 }

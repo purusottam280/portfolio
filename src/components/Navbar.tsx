@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
 
 const navLinks = [
@@ -11,7 +11,7 @@ const navLinks = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState('')
+  const [activeSection, setActiveSection] = useState('hero')
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
   const [isMobile, setIsMobile] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -19,24 +19,24 @@ export default function Navbar() {
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth >= 768) {
-        setMobileMenuOpen(false)
-      }
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onResize = () => {
+      const mobile = window.innerWidth < 840
+      setIsMobile(mobile)
+      if (!mobile) setMobileMenuOpen(false)
     }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+
+    onScroll()
+    onResize()
+    window.addEventListener('scroll', onScroll)
+    window.addEventListener('resize', onResize)
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
 
-  // Intersection observer for active section
   useEffect(() => {
     const sections = ['about', 'projects', 'skills', 'contact']
     const observers: IntersectionObserver[] = []
@@ -44,234 +44,226 @@ export default function Navbar() {
     sections.forEach(id => {
       const el = document.getElementById(id)
       if (!el) return
-      const obs = new IntersectionObserver(
+      const observer = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) setActiveSection(id)
         },
-        { threshold: 0.4 }
+        { threshold: 0.45 }
       )
-      obs.observe(el)
-      observers.push(obs)
+      observer.observe(el)
+      observers.push(observer)
     })
 
-    return () => observers.forEach(o => o.disconnect())
+    return () => observers.forEach(observer => observer.disconnect())
   }, [])
 
-  // Slide indicator under active link
   useEffect(() => {
-    const idx = navLinks.findIndex(l => l.href === `#${activeSection}`)
-    if (idx >= 0 && linkRefs.current[idx] && navRef.current && !isMobile) {
-      const navRect = navRef.current.getBoundingClientRect()
-      const linkRect = linkRefs.current[idx]!.getBoundingClientRect()
-      setIndicatorStyle({
-        left: linkRect.left - navRect.left,
-        width: linkRect.width,
-      })
-    }
+    const index = navLinks.findIndex(link => link.href === `#${activeSection}`)
+    if (index < 0 || !navRef.current || !linkRefs.current[index] || isMobile) return
+
+    const navRect = navRef.current.getBoundingClientRect()
+    const linkRect = linkRefs.current[index]!.getBoundingClientRect()
+    setIndicatorStyle({
+      left: linkRect.left - navRect.left,
+      width: linkRect.width,
+    })
   }, [activeSection, isMobile])
 
   return (
-    <motion.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        background: scrolled ? 'rgba(10, 10, 15, 0.85)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
-        transition: 'background 0.3s ease, border-bottom 0.3s ease',
-      }}
-    >
-      <div
+    <div className="nav-shell">
+      <motion.header
+        initial={{ y: -24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className={`glass-panel-strong holo-border brutal-panel`}
         style={{
-          maxWidth: 1100,
-          margin: '0 auto',
-          padding: '16px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          borderRadius: 18,
           position: 'relative',
+          overflow: 'hidden',
+          transform: 'skewX(-0.8deg)',
         }}
       >
-        {/* Logo */}
-        <motion.a
-          href="#"
+        <div
           style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: '1.25rem',
-            fontWeight: 700,
-            letterSpacing: '-0.025em',
-            textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            padding: '14px 18px',
           }}
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: 'spring', stiffness: 400 }}
         >
-          <span className="gradient-text">PP</span>
-          <span style={{ color: 'rgba(255, 255, 255, 0.3)', margin: '0 6px' }}>·</span>
-          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.875rem', fontWeight: 500 }}>AI Engineer</span>
-        </motion.a>
-
-        {/* Desktop Nav Links */}
-        {!isMobile && (
-          <nav
-            ref={navRef}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 32,
-              position: 'relative',
-            }}
-          >
-            {navLinks.map((link, i) => (
-              <a
-                key={link.href}
-                href={link.href}
-                ref={el => { linkRefs.current[i] = el }}
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  textDecoration: 'none',
-                  position: 'relative',
-                  paddingBottom: 4,
-                  color: activeSection === link.href.slice(1) ? '#fff' : 'rgba(161, 161, 170, 0.8)',
-                  transition: 'color 0.2s',
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
-
-            {/* Sliding indicator */}
-            {activeSection && (
-              <motion.div
-                className="nav-indicator"
-                animate={{ left: indicatorStyle.left, width: indicatorStyle.width }}
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-              />
-            )}
-          </nav>
-        )}
-
-        {/* Desktop CTA */}
-        {!isMobile && (
           <motion.a
-            href="#contact"
-            className="btn-shimmer"
+            href="#hero"
+            whileHover={{ scale: 1.03 }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px 18px',
-              borderRadius: 8,
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              color: '#fff',
+              gap: 12,
               textDecoration: 'none',
-              background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)',
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Hire Me
-          </motion.a>
-        )}
-
-        {/* Mobile menu toggle */}
-        {isMobile && (
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: '#fff',
-              cursor: 'pointer',
-              padding: 4,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 60,
+              minWidth: 0,
             }}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        )}
-      </div>
-
-      {/* Mobile menu dropdown */}
-      <AnimatePresence>
-        {isMobile && mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            style={{
-              position: 'absolute',
-              top: '100%',
-              left: 0,
-              right: 0,
-              background: 'rgba(10, 10, 15, 0.95)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              padding: '24px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 20,
-            }}
-          >
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                style={{
-                  fontFamily: 'Space Grotesk, sans-serif',
-                  fontSize: '1.2rem',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  color: activeSection === link.href.slice(1) ? '#6366F1' : 'rgba(255, 255, 255, 0.8)',
-                  padding: '8px 0',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                }}
-              >
-                {link.label}
-              </a>
-            ))}
-            <a
-              href="#contact"
-              onClick={() => setMobileMenuOpen(false)}
-              className="btn-shimmer"
+            <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '12px',
+                width: 42,
+                height: 42,
                 borderRadius: 10,
-                fontSize: '1rem',
-                fontWeight: 600,
+                background: 'linear-gradient(135deg, rgba(124,58,237,0.95), rgba(34,211,238,0.92))',
+                display: 'grid',
+                placeItems: 'center',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 700,
+                letterSpacing: '-0.05em',
                 color: '#fff',
-                textDecoration: 'none',
-                background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-                marginTop: 8,
-                textAlign: 'center',
+                boxShadow: '0 10px 30px rgba(34, 211, 238, 0.18)',
               }}
             >
-              Hire Me
-            </a>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.header>
+              PP
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  letterSpacing: '-0.04em',
+                  color: '#fff',
+                  lineHeight: 1.1,
+                  textTransform: 'uppercase',
+                }}
+              >
+                Purusottam Patel
+              </div>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.62rem',
+                  color: 'rgba(247,249,252,0.55)',
+                  letterSpacing: '0.26em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                AI Engineer
+              </div>
+            </div>
+          </motion.a>
+
+          {!isMobile && (
+            <nav
+              ref={navRef}
+              style={{
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 28,
+              }}
+            >
+              {navLinks.map((link, index) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  ref={el => {
+                    linkRefs.current[index] = el
+                  }}
+                  className={`nav-link ${activeSection === link.href.slice(1) ? 'active' : ''}`}
+                >
+                  {link.label}
+                </a>
+              ))}
+              {activeSection !== 'hero' && (
+                <motion.div
+                  className="nav-indicator"
+                  animate={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+                  transition={{ type: 'spring', stiffness: 460, damping: 36 }}
+                />
+              )}
+            </nav>
+          )}
+
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <a href="/Purusottam_Patel_exp.pdf" target="_blank" rel="noopener noreferrer" className="button-secondary brutal-panel">
+                Resume
+              </a>
+              <a href="#contact" className="button-primary brutal-panel">
+                Book a Call
+              </a>
+            </div>
+          )}
+
+          {isMobile && (
+            <button
+              type="button"
+              aria-label="Toggle menu"
+              onClick={() => setMobileMenuOpen(v => !v)}
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(255,255,255,0.04)',
+                color: '#fff',
+                display: 'grid',
+                placeItems: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          )}
+        </div>
+
+        <AnimatePresence>
+          {isMobile && mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -12, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -12, height: 0 }}
+              transition={{ duration: 0.24, ease: 'easeOut' }}
+              style={{
+                borderTop: '1px solid rgba(255,255,255,0.07)',
+                padding: '16px 18px 18px',
+                display: 'grid',
+                gap: 12,
+              }}
+            >
+              {navLinks.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="nav-link"
+                  style={{ fontSize: '0.95rem' }}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div style={{ display: 'grid', gap: 10, marginTop: 6 }}>
+                <a
+                  href="/Purusottam_Patel_exp.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="button-secondary brutal-panel"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Resume
+                </a>
+                <a href="#contact" className="button-primary brutal-panel" onClick={() => setMobileMenuOpen(false)}>
+                  Book a Call
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
+
+      <div
+        style={{
+          height: 1,
+          marginTop: 12,
+          background: scrolled ? 'linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent)' : 'transparent',
+        }}
+      />
+    </div>
   )
 }

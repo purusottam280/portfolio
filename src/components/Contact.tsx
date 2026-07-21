@@ -1,96 +1,72 @@
-import { useState, useRef, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Send, Mail, CheckCircle, AlertCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { motion } from 'motion/react'
+import { AlertCircle, CheckCircle, Mail, Send } from 'lucide-react'
 import { GithubIcon, LinkedinIcon } from './Icons'
-
-const easeSmooth = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
-function GlowInput({
-  label, id, type = 'text', multiline = false, value, onChange, placeholder,
+function Field({
+  label,
+  id,
+  value,
+  onChange,
+  placeholder,
+  multiline = false,
+  type = 'text',
 }: {
-  label: string; id: string; type?: string; multiline?: boolean;
-  value: string; onChange: (v: string) => void; placeholder: string;
+  label: string
+  id: string
+  value: string
+  onChange: (value: string) => void
+  placeholder: string
+  multiline?: boolean
+  type?: string
 }) {
-  const [focused, setFocused] = useState(false)
-
-  const sharedStyle: React.CSSProperties = {
-    background: 'transparent',
-    color: '#fff',
-    outline: 'none',
-    width: '100%',
-    fontFamily: 'Inter, sans-serif',
-    fontSize: '0.9rem',
-    padding: '12px 0',
-    border: 'none',
-    resize: 'none' as const,
-  }
-
   return (
-    <div style={{ marginBottom: 24 }}>
-      <label
-        htmlFor={id}
-        style={{
-          display: 'block',
-          fontFamily: 'Inter, sans-serif',
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          marginBottom: 8,
-          color: focused ? '#6366F1' : 'rgba(161,161,170,0.6)',
-          transition: 'color 0.2s ease',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {label}
-      </label>
-      <div
-        style={{
-          position: 'relative',
-          borderBottom: `1px solid ${focused ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.12)'}`,
-          transition: 'border-color 0.3s ease',
-        }}
-      >
-        {multiline ? (
-          <textarea
-            id={id}
-            rows={4}
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder={placeholder}
-            style={sharedStyle}
-          />
-        ) : (
-          <input
-            id={id}
-            type={type}
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            placeholder={placeholder}
-            style={sharedStyle}
-          />
-        )}
-        {/* Animated bottom line */}
-        <div
+    <label style={{ display: 'grid', gap: 10 }}>
+      <span className="project-meta">{label}</span>
+      {multiline ? (
+        <textarea
+          id={id}
+          rows={5}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
           style={{
-            position: 'absolute',
-            bottom: -1,
-            left: focused ? 0 : '50%',
-            width: focused ? '100%' : '0%',
-            height: 2,
-            background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-            transition: 'width 0.3s ease, left 0.3s ease',
-            borderRadius: 2,
-            boxShadow: '0 0 8px rgba(99,102,241,0.5)',
+            width: '100%',
+            resize: 'vertical',
+            minHeight: 150,
+            padding: '16px 16px',
+            borderRadius: 18,
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.03)',
+            color: '#fff',
+            outline: 'none',
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.98rem',
           }}
         />
-      </div>
-    </div>
+      ) : (
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          style={{
+            width: '100%',
+            padding: '16px 16px',
+            borderRadius: 18,
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.03)',
+            color: '#fff',
+            outline: 'none',
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.98rem',
+          }}
+        />
+      )}
+    </label>
   )
 }
 
@@ -103,386 +79,203 @@ export default function Contact() {
   const formRef = useRef<HTMLFormElement>(null)
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 992)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
+    const check = () => setIsMobile(window.innerWidth < 960)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name || !email || !message) return
+
     setStatus('sending')
     try {
       const response = await fetch('https://formsubmit.co/ajax/purusottampatel2001@gmail.com', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify({
-          name,
-          email,
-          message
-        })
+        body: JSON.stringify({ name, email, message }),
       })
-      if (response.ok) {
-        setStatus('success')
-        setName('')
-        setEmail('')
-        setMessage('')
-      } else {
-        setStatus('error')
-      }
+
+      if (!response.ok) throw new Error('Request failed')
+      setStatus('success')
+      setName('')
+      setEmail('')
+      setMessage('')
     } catch (error) {
-      console.error('Error sending message:', error)
+      console.error(error)
       setStatus('error')
     } finally {
-      setTimeout(() => setStatus('idle'), 4000)
+      window.setTimeout(() => setStatus('idle'), 3500)
     }
   }
 
-  const contactItems = [
+  const items = [
     {
-      Icon: Mail,
+      icon: Mail,
       label: 'Email',
       value: 'purusottampatel2001@gmail.com',
       href: 'mailto:purusottampatel2001@gmail.com',
-      color: '#6366F1',
+      accent: '#22d3ee',
     },
     {
-      CustomIcon: GithubIcon,
+      icon: GithubIcon,
       label: 'GitHub',
       value: 'github.com/purusottam280',
       href: 'https://github.com/purusottam280',
-      color: '#8B5CF6',
+      accent: '#a78bfa',
     },
     {
-      CustomIcon: LinkedinIcon,
+      icon: LinkedinIcon,
       label: 'LinkedIn',
       value: 'linkedin.com/in/purusottampatel',
       href: 'https://linkedin.com/in/purusottampatel',
-      color: '#06B6D4',
+      accent: '#f59e0b',
     },
-  ] as Array<{
-    Icon?: typeof Mail;
-    CustomIcon?: typeof GithubIcon;
-    label: string; value: string; href: string; color: string;
-  }>
+  ]
 
   return (
-    <section
-      id="contact"
-      style={{ position: 'relative', padding: '112px 24px', overflow: 'hidden' }}
-    >
-      {/* Aurora */}
-      <div
-        className="aurora-orb"
-        style={{
-          width: 600, height: 600,
-          background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
-          bottom: '-10%', left: '20%',
-          animation: 'auroraFloat1 20s ease-in-out infinite',
-        }}
-      />
+    <section id="contact" className="section-frame">
+      <div className="ambient-orb orb-a" style={{ left: '-10%', bottom: '-10%' }} />
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-
-        {/* ── Section Header (centered) ─── */}
+      <div className="section-grid">
         <motion.div
-          style={{ textAlign: 'center', marginBottom: 72 }}
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.7, ease: easeSmooth }}
+          viewport={{ once: true, margin: '-120px' }}
+          transition={{ duration: 0.55 }}
+          style={{ maxWidth: 760, marginBottom: 28 }}
         >
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <div style={{ width: 24, height: 1, background: 'rgba(99,102,241,0.5)' }} />
-            <span style={{
-              fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600,
-              letterSpacing: '0.14em', textTransform: 'uppercase' as const,
-              background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>Contact</span>
-            <div style={{ width: 24, height: 1, background: 'rgba(6,182,212,0.5)' }} />
-          </div>
-
-          <h2 style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
-            fontWeight: 700, color: '#fff', lineHeight: 1.15, marginBottom: 16,
-          }}>
-            Let's build something{' '}
-            <span style={{
-              background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            }}>
-              extraordinary
+          <div className="section-kicker" style={{ marginBottom: 18 }}>Contact</div>
+          <h2 className="section-title" style={{ marginBottom: 16 }}>
+            Let us build something
+            <span style={{ display: 'block', background: 'linear-gradient(135deg, #fff 0%, #22d3ee 48%, #f59e0b 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              that feels from the future.
             </span>
           </h2>
-
-          <div style={{
-            width: 56, height: 3,
-            background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-            borderRadius: 2, margin: '0 auto',
-            boxShadow: '0 0 10px rgba(99,102,241,0.5)',
-          }} />
+          <p className="section-copy" style={{ maxWidth: 680 }}>
+            Have an AI product idea, an automation problem, or a collaboration in mind? Send it over and I’ll
+            respond with a clear next step, not generic fluff.
+          </p>
         </motion.div>
 
-        {/* ── Grid Layout ─── */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-            gap: 64,
-            alignItems: 'start',
-          }}
-        >
-          {/* Left: Contact Info */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '0.88fr 1.12fr', gap: 18 }}>
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: easeSmooth }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 28 }}
+            viewport={{ once: true, margin: '-120px' }}
+            transition={{ duration: 0.6 }}
+            className="glass-panel-strong holo-border brutal-panel"
+            style={{ borderRadius: 18, padding: 24, transform: 'skewX(-0.35deg)' }}
           >
-            <p
-              style={{
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '1.05rem',
-                lineHeight: 1.8,
-                color: 'rgba(200,200,215,0.75)',
-              }}
-            >
-              I'm always open to exciting AI projects, collaborations, and opportunities.
-              Whether you need an autonomous agent system, a custom RAG pipeline, or a full-stack LLM product — let's connect and design the future together.
-            </p>
+            <div className="project-meta" style={{ marginBottom: 18 }}>Direct lines</div>
 
-            {/* Info Cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {contactItems.map(item => (
-                <motion.a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="glass-card"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 16,
-                    padding: '18px 24px',
-                    borderRadius: 16,
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    textDecoration: 'none',
-                    transition: 'all 0.3s ease',
-                  }}
-                  whileHover={{
-                    borderColor: `${item.color}40`,
-                    backgroundColor: `${item.color}0A`,
-                    x: 6,
-                  }}
-                >
-                  <div
+            <div style={{ display: 'grid', gap: 14 }}>
+              {items.map(item => {
+                const Icon = item.icon
+                return (
+                  <motion.a
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ x: 4 }}
+                    className="glass-panel brutal-panel"
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      display: 'flex',
+                      display: 'grid',
+                      gridTemplateColumns: '44px 1fr',
+                      gap: 14,
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      background: `${item.color}20`,
-                      border: `1px solid ${item.color}33`,
+                      borderRadius: 12,
+                      padding: 16,
+                      textDecoration: 'none',
                     }}
                   >
-                    {item.Icon
-                      ? <item.Icon size={20} color={item.color} />
-                      : item.CustomIcon
-                        ? <item.CustomIcon size={20} color={item.color} />
-                        : null
-                    }
-                  </div>
-                  <div>
-                    <div style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.72rem',
-                      fontWeight: 600,
-                      color: 'rgba(255,255,255,0.4)',
-                      letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      marginBottom: 2,
-                    }}>
-                      {item.label}
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 14,
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: `${item.accent}18`,
+                        border: `1px solid ${item.accent}2b`,
+                      }}
+                    >
+                      <Icon size={18} color={item.accent} />
                     </div>
-                    <div style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.95rem',
-                      fontWeight: 500,
-                      color: 'rgba(255,255,255,0.85)',
-                    }}>
-                      {item.value}
+                    <div>
+                      <div className="project-meta" style={{ marginBottom: 4 }}>{item.label}</div>
+                      <div style={{ fontSize: '0.96rem', color: 'rgba(247,249,252,0.9)' }}>{item.value}</div>
                     </div>
-                  </div>
-                </motion.a>
-              ))}
+                  </motion.a>
+                )
+              })}
             </div>
 
-            {/* Availability Badge */}
-            <div>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: '10px 18px',
-                  borderRadius: 9999,
-                  background: 'rgba(34,197,94,0.08)',
-                  border: '1px solid rgba(34,197,94,0.2)',
-                }}
-              >
-                <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: '50%',
-                    background: '#22c55e',
-                    boxShadow: '0 0 10px #22c55e',
-                  }}
-                  className="animate-pulse"
-                />
-                <span style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '0.85rem',
-                  color: '#22c55e',
-                  fontWeight: 500,
-                }}>
-                  Available for freelance &amp; full-time roles
-                </span>
+            <div className="glass-panel brutal-panel" style={{ borderRadius: 12, padding: 18, marginTop: 16 }}>
+              <div className="project-meta" style={{ marginBottom: 8 }}>Availability</div>
+              <div style={{ fontSize: '1rem', lineHeight: 1.7, color: 'rgba(247,249,252,0.84)' }}>
+                Open for select freelance work, product collaborations, and AI engineering roles.
               </div>
             </div>
           </motion.div>
 
-          {/* Right: Message Form */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: easeSmooth }}
+            viewport={{ once: true, margin: '-120px' }}
+            transition={{ duration: 0.6, delay: 0.08 }}
+            className="glass-panel-strong holo-border brutal-panel"
+            style={{ borderRadius: 18, padding: 24, transform: 'skewX(0.35deg)' }}
           >
-            <div
-              className="glass-card"
-              style={{
-                borderRadius: 24,
-                padding: isMobile ? '28px 20px' : '40px 36px',
-                border: '1px solid rgba(255,255,255,0.07)',
-              }}
-            >
-              {status === 'success' ? (
-                <motion.div
+            {status === 'success' ? (
+                <div style={{ minHeight: 420, display: 'grid', placeItems: 'center', textAlign: 'center', padding: '24px 0' }}>
+                <CheckCircle size={54} color="var(--accent-2)" style={{ marginBottom: 16 }} />
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', letterSpacing: '-0.05em', marginBottom: 10 }}>
+                  Message sent.
+                </div>
+                <div className="section-copy" style={{ maxWidth: 460 }}>
+                  Thanks for reaching out. I’ll get back to you with a thoughtful reply as soon as possible.
+                </div>
+              </div>
+            ) : (
+              <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'grid', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}>
+                  <Field label="Name" id="name" value={name} onChange={setName} placeholder="Your name" />
+                  <Field label="Email" id="email" type="email" value={email} onChange={setEmail} placeholder="you@company.com" />
+                </div>
+                <Field label="Message" id="message" multiline value={message} onChange={setMessage} placeholder="Tell me what you want to build..." />
+
+                {status === 'error' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#fda4af', fontSize: '0.92rem' }}>
+                    <AlertCircle size={16} />
+                    Something went wrong. Please try again.
+                  </div>
+                )}
+
+                <motion.button
+                  type="submit"
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="button-primary"
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
+                    border: 'none',
+                    cursor: status === 'sending' ? 'wait' : 'pointer',
                     justifyContent: 'center',
-                    padding: '48px 0',
-                    textAlign: 'center',
+                    padding: '15px 22px',
+                    transform: 'skewX(-1deg)',
                   }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 200 }}
+                  disabled={status === 'sending'}
                 >
-                  <CheckCircle size={56} color="#22C55E" style={{ marginBottom: 16 }} />
-                  <h3 style={{
-                    fontFamily: 'Space Grotesk, sans-serif',
-                    fontSize: '1.4rem',
-                    fontWeight: 700,
-                    color: '#fff',
-                    marginBottom: 8,
-                  }}>
-                    Message Sent Successfully!
-                  </h3>
-                  <p style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '0.9rem',
-                    color: 'rgba(255,255,255,0.5)',
-                  }}>
-                    Thank you for reaching out. I'll get back to you within 24 hours.
-                  </p>
-                </motion.div>
-              ) : (
-                <form ref={formRef} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <GlowInput label="Full Name" id="contact-name" value={name} onChange={setName} placeholder="John Doe" />
-                  <GlowInput label="Email Address" id="contact-email" type="email" value={email} onChange={setEmail} placeholder="john@example.com" />
-                  <GlowInput label="Message" id="contact-message" multiline value={message} onChange={setMessage} placeholder="Tell me about your project..." />
-
-                  {status === 'error' && (
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginBottom: 16,
-                      color: '#f87171',
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.875rem',
-                    }}>
-                      <AlertCircle size={16} />
-                      Something went wrong. Please try again.
-                    </div>
-                  )}
-
-                  <motion.button
-                    type="submit"
-                    disabled={status === 'sending'}
-                    className="btn-shimmer btn-pulse"
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                      padding: '14px 24px',
-                      borderRadius: 12,
-                      fontWeight: 600,
-                      color: '#fff',
-                      background: status === 'sending'
-                        ? 'rgba(99,102,241,0.5)'
-                        : 'linear-gradient(135deg, #6366F1, #06B6D4)',
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '0.95rem',
-                      boxShadow: '0 0 30px rgba(99,102,241,0.25)',
-                      cursor: status === 'sending' ? 'wait' : 'pointer',
-                      border: 'none',
-                      marginTop: 8,
-                    }}
-                    whileHover={{ scale: status === 'idle' ? 1.02 : 1 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    {status === 'sending' ? (
-                      <>
-                        <motion.div
-                          style={{
-                            width: 16,
-                            height: 16,
-                            borderRadius: '50%',
-                            border: '2px solid rgba(255,255,255,0.3)',
-                            borderTopColor: '#fff',
-                          }}
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
-                        />
-                        Sending Message...
-                      </>
-                    ) : (
-                      <>
-                        <Send size={16} />
-                        Send Message
-                      </>
-                    )}
-                  </motion.button>
-                </form>
-              )}
-            </div>
+                  {status === 'sending' ? 'Sending...' : 'Launch the conversation'}
+                  <Send size={16} />
+                </motion.button>
+              </form>
+            )}
           </motion.div>
         </div>
       </div>
