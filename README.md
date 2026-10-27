@@ -49,6 +49,16 @@ I am passionate about leveraging cutting-edge AI to solve real-world problems an
 
 ## 🚀 Projects & Experience
 
+### 💼 Experience: AI Benchmark Task Author — Handshake AI (Projects Dynamo & Insight)
+*Contract / Remote | Jul 2026 – Present*
+* **What it is:** Authoring frontier coding benchmarks that measure how well AI agents do real professional work in a terminal. Every task ships as a Dockerized environment with a concise brief, a reference solution, and hardened behavioural verifiers.
+* **Core Work:**
+  * Design tasks that require genuine multi-step terminal work from a domain expert, scored against the programme rubric and diversity taxonomy.
+  * Write reference solutions and pytest verifiers that test behaviour only, with fork-isolated workers and CI workflows for validation, trial runs, and review.
+  * Project Dynamo (Jul 2026 →): agentic coding tasks such as a deadline-aware, idempotent dynamic batch router with drain-safe model hot reloads.
+  * Project Insight (Sep 2026 →): Terminal-Bench 3 style tasks across hardware CAD/RTL, chemistry, applied mathematics, geosciences, materials, and operations research.
+* **Tech Stack:** Python, asyncio, pytest, Docker, GitHub Actions, Terminal-Bench
+
 ### 💼 Experience: Hiring Intelligence & ATS Automation Platform
 *Associate — Intellativ India Pvt Ltd | Feb 2026 – Present*
 * **What it does:** End-to-end recruitment platform covering resume parsing, ATS scoring, and candidate pipeline management.

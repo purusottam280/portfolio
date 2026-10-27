@@ -1,0 +1,98 @@
+/* ---------- film-strip scroll indicator (right edge, desktop only) ---------- */
+
+.film-reel {
+  position: fixed;
+  top: 0;
+  right: 6px;
+  bottom: 0;
+  width: 22px;
+  z-index: 95;
+  pointer-events: none;
+  overflow: visible;
+  /* near-black base with faint edge lines (outer rails + inner rails beside the sprocket columns) */
+  background:
+    linear-gradient(
+      to right,
+      rgba(245, 244, 232, 0.14) 0 1px,
+      transparent 1px 8px,
+      rgba(245, 244, 232, 0.05) 8px 9px,
+      transparent 9px 13px,
+      rgba(245, 244, 232, 0.05) 13px 14px,
+      transparent 14px 21px,
+      rgba(245, 244, 232, 0.14) 21px 22px
+    ),
+    rgba(5, 5, 4, 0.82);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.55);
+}
+
+.film-reel-holes {
+  position: absolute;
+  inset: 0 1px;
+  /* background-position-y is driven per frame from scroll; all layers tile on multiples of 12px / 48px */
+  background-image:
+    /* left sprocket column */
+    radial-gradient(2.1px 2.7px at 4.5px 6px, rgba(245, 244, 232, 0.2) 0 72%, transparent 100%),
+    /* right sprocket column */
+    radial-gradient(2.1px 2.7px at 15.5px 6px, rgba(245, 244, 232, 0.2) 0 72%, transparent 100%),
+    /* frame divider between the columns, once every 4 holes */
+    linear-gradient(to bottom, rgba(245, 244, 232, 0.09) 0 1px, transparent 1px);
+  background-size: 20px 12px, 20px 12px, 20px 48px;
+  background-repeat: repeat-y;
+  background-position-x: 0;
+  background-position-y: 0;
+  will-change: background-position;
+}
+
+/* gate light: very faint accent glow at the strip centre, as if lit from behind */
+.film-reel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(233, 255, 75, 0.035) 50%,
+    transparent 100%
+  );
+}
+
+.film-reel-head {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  right: -3px;
+  height: 2px;
+  z-index: 1;
+  will-change: transform;
+}
+
+.film-reel-mark {
+  position: absolute;
+  inset: 0;
+  background: var(--accent, #e9ff4b);
+  box-shadow:
+    0 0 6px rgba(233, 255, 75, 0.85),
+    0 0 18px rgba(233, 255, 75, 0.35);
+}
+
+.film-reel-frame {
+  position: absolute;
+  right: calc(100% + 6px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent, #e9ff4b);
+  opacity: 0.8;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+@media (max-width: 899px) {
+  .film-reel {
+    display: none;
+  }
+}

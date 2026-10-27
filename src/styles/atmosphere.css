@@ -1,0 +1,39 @@
+/* ---------- WebGL atmosphere (fixed, behind all content) ---------- */
+
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  contain: strict;
+  animation: atmosphere-in 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* the fiber wrapper div sets pointer-events: auto inline; never let it catch input */
+.atmosphere,
+.atmosphere * {
+  pointer-events: none !important;
+}
+
+.atmosphere canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  /* dpr 0.5 buffer: let the browser smooth the upscale */
+  image-rendering: auto;
+}
+
+@keyframes atmosphere-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atmosphere {
+    animation: none;
+  }
+}

@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { animate } from 'animejs'
-import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { useGSAP } from '@gsap/react'
+import { ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from './Icons'
+import { gsap, ScrollTrigger, prefersReducedMotion, registerScene, scrollState } from '../lib/scroll'
+import { initTilt } from '../lib/tilt'
 
 type Project = {
   title: string
@@ -36,7 +37,7 @@ const projects: Project[] = [
     accent: '#ff5a1f',
     metric: 'LLaMA 3.3',
     metricLabel: 'inference engine',
-    image: '/profile.jpg',
+    image: '/hiring_intelligence.png',
     index: '02',
   },
   {
@@ -47,7 +48,7 @@ const projects: Project[] = [
     accent: '#ffdd00',
     metric: '10+',
     metricLabel: 'languages',
-    image: '/hiring_signals.png',
+    image: '/multilingual_finance.png',
     index: '03',
   },
   {
@@ -58,116 +59,198 @@ const projects: Project[] = [
     accent: '#fc314d',
     metric: 'Multi-step',
     metricLabel: 'planning flow',
-    image: '/profile.jpg',
+    image: '/agentic_travel.png',
     index: '04',
   },
 ]
 
-const deckVariants = {
-  enter: (direction: number) => ({ opacity: 0, x: direction > 0 ? 110 : -110, rotate: direction > 0 ? 2 : -2, scale: 0.96 }),
-  center: { opacity: 1, x: 0, rotate: 0, scale: 1 },
-  exit: (direction: number) => ({ opacity: 0, x: direction > 0 ? -90 : 90, rotate: direction > 0 ? -1.5 : 1.5, scale: 0.98 }),
-}
-
 export default function Projects() {
-  const [activeIndex, setActiveIndex] = useState(0)
-  const [direction, setDirection] = useState(1)
-  const scanRef = useRef<HTMLDivElement>(null)
-  const project = projects[activeIndex]
+  const scope = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+  const counterRef = useRef<HTMLSpanElement>(null)
 
-  useEffect(() => {
-    if (!scanRef.current) return
-    animate(scanRef.current, {
-      x: ['-110%', '110%'],
-      opacity: [0, 0.85, 0],
-      duration: 620,
-      ease: 'out(4)',
-    })
-  }, [activeIndex])
+  useEffect(() => registerScene(scope.current, { index: '05', label: 'Archive' }), [])
+  // tilt the body, not .project-panel (its rotateY is a scroll scrub)
+  useEffect(() => initTilt(scope.current, '.project-body'), [])
 
-  const changeProject = (nextDirection: number) => {
-    setDirection(nextDirection)
-    setActiveIndex(current => (current + nextDirection + projects.length) % projects.length)
-  }
+  useGSAP(
+    () => {
+      if (prefersReducedMotion() || !trackRef.current) return
+      const mm = gsap.matchMedia()
+
+      mm.add('(min-width: 901px)', () => {
+        const track = trackRef.current
+        if (!track) return
+        const distance = () => track.scrollWidth - window.innerWidth
+
+        const tween = gsap.to(track, { x: () => -distance(), ease: 'none' })
+
+        const st = ScrollTrigger.create({
+          trigger: scope.current,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 1,
+          animation: tween,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
+          onUpdate: self => {
+            if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`
+            if (counterRef.current) {
+              const n = Math.min(projects.length, Math.floor(self.progress * projects.length) + 1)
+              counterRef.current.textContent = String(n).padStart(2, '0')
+            }
+          },
+        })
+
+        // velocity skew on the horizontal track
+        const skewSet = gsap.quickSetter(track, 'skewX', 'deg') as (v: number) => void
+        let skew = 0
+        const tick = () => {
+          const target = gsap.utils.clamp(-8, 8, scrollState.velocity * 0.1)
+          skew += (target - skew) * 0.1
+          skewSet(skew)
+        }
+        gsap.ticker.add(tick)
+
+        // each panel swings in from 3D space, settles, then leans away as it exits
+        gsap.utils.toArray<HTMLElement>('.project-panel').forEach(panel => {
+          const tl = gsap.timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: { trigger: panel, containerAnimation: tween, start: 'left 100%', end: 'right 0%', scrub: true },
+          })
+          tl.fromTo(panel, { rotateY: 18, scale: 0.9, opacity: 0.55 }, { rotateY: 0, scale: 1, opacity: 1, duration: 0.38 }, 0)
+            .to(panel, { rotateY: -12, scale: 0.94, opacity: 0.7, duration: 0.38 }, 0.62)
+
+          const img = panel.querySelector<HTMLElement>('.project-media img')
+          if (img) {
+            gsap.fromTo(
+              img,
+              { xPercent: 6, scale: 1.18 },
+              {
+                xPercent: -12,
+                scale: 1.02,
+                ease: 'none',
+                scrollTrigger: { trigger: panel, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
+              }
+            )
+          }
+
+          const body = panel.querySelector<HTMLElement>('.project-body')
+          if (body) {
+            gsap.fromTo(
+              body.children,
+              { opacity: 0, y: 40 },
+              {
+                opacity: 1,
+                y: 0,
+                stagger: 0.05,
+                ease: 'none',
+                scrollTrigger: { trigger: panel, containerAnimation: tween, start: 'left 85%', end: 'left 30%', scrub: true },
+              }
+            )
+          }
+        })
+
+        return () => {
+          gsap.ticker.remove(tick)
+          st.kill()
+        }
+      })
+
+      mm.add('(max-width: 900px)', () => {
+        gsap.utils.toArray<HTMLElement>('.project-panel').forEach(panel => {
+          gsap.from(panel, {
+            y: 60,
+            opacity: 0,
+            duration: 0.9,
+            ease: 'cineOut',
+            scrollTrigger: { trigger: panel, start: 'top 85%' },
+          })
+        })
+      })
+
+      gsap.from('.projects-head > *', {
+        y: 40,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.projects-head', start: 'top 80%' },
+      })
+    },
+    { scope }
+  )
 
   return (
-    <section id="projects" className="section-frame">
-      <div className="ambient-orb orb-a" style={{ left: '-12%', top: '0%' }} />
-      <div className="ambient-orb orb-b" style={{ right: '-12%', bottom: '-10%' }} />
-
-      <div className="section-grid">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 24, flexWrap: 'wrap', marginBottom: 34 }}>
-          <div style={{ maxWidth: 720 }}>
-            <div className="section-kicker" style={{ marginBottom: 18 }}>Selected work / live archive</div>
-            <h2 className="section-title">
-              SYSTEMS THAT
-              <span style={{ display: 'block', color: 'var(--accent)' }}>DON'T SIT STILL.</span>
-            </h2>
-          </div>
-          <div className="data-strip">Archive / {String(activeIndex + 1).padStart(2, '0')} of {projects.length}</div>
+    <section id="projects" className="projects" ref={scope}>
+      <div className="projects-head">
+        <div>
+          <span className="kicker">
+            <span className="kicker-index">004</span> Selected work
+          </span>
+          <h2 className="display-lg" style={{ marginTop: 16 }}>
+            Systems that <span className="accent-text">don't sit still.</span>
+          </h2>
         </div>
+        <div className="projects-head-meta">
+          <span className="projects-counter">
+            <span ref={counterRef}>01</span>
+            <span className="projects-counter-sep">/</span>
+            <span>{String(projects.length).padStart(2, '0')}</span>
+          </span>
+          <span className="mono-meta projects-hint">Scroll to traverse →</span>
+        </div>
+      </div>
 
-        <div className="project-deck brutal-panel">
-          <div ref={scanRef} className="project-deck-scan" aria-hidden="true" />
-          <AnimatePresence mode="wait" custom={direction} initial={false}>
-            <motion.article
-              key={project.index}
-              custom={direction}
-              variants={deckVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ type: 'spring', stiffness: 135, damping: 19, mass: 0.86 }}
-              className="project-deck-content"
-            >
-              <div className="project-deck-image">
-                <img src={project.image} alt={project.title} />
-                <div className="project-deck-image-shade" />
-                <div className="project-deck-index">{project.index}</div>
-                <div className="project-deck-caption">classified build / {project.subtitle}</div>
+      <div className="projects-stage">
+        <div className="projects-track" ref={trackRef}>
+          {projects.map(project => (
+            <article key={project.index} className="project-panel" style={{ '--accent-p': project.accent } as React.CSSProperties}>
+              <div className="project-index">{project.index}</div>
+              <div className="project-media" data-cursor="View">
+                <img src={project.image} alt={project.title} loading="lazy" onLoad={() => ScrollTrigger.refresh()} />
+                <div className="project-media-shade" />
+                <div className="project-media-caption mono-meta">Classified build / {project.subtitle}</div>
               </div>
-
-              <div className="project-deck-copy">
-                <div className="project-meta" style={{ color: project.accent }}>{project.subtitle}</div>
-                <h3 className="project-title project-deck-title">{project.title}</h3>
-                <p className="section-copy">{project.description}</p>
-
-                <div className="project-deck-metric" style={{ borderColor: `${project.accent}88` }}>
-                  <span>{project.metric}</span>
-                  <small>{project.metricLabel}</small>
+              <div className="project-body">
+                <span className="mono-meta" style={{ color: project.accent }}>
+                  {project.subtitle}
+                </span>
+                <h3 className="project-title">{project.title}</h3>
+                <p className="project-desc">{project.description}</p>
+                <div className="project-tags">
+                  {project.tags.map(tag => (
+                    <span key={tag} className="tag-chip">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
-
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {project.tags.map(tag => <span key={tag} className="tag-chip">{tag}</span>)}
+                <div className="project-metric">
+                  <strong>{project.metric}</strong>
+                  <span className="mono-meta">{project.metricLabel}</span>
                 </div>
-
-                <a href="https://github.com/purusottam280" target="_blank" rel="noopener noreferrer" className="project-deck-source">
-                  <GithubIcon size={16} color="currentColor" /> Inspect source
+                <a className="project-link" href="https://github.com/purusottam280" target="_blank" rel="noopener noreferrer" data-cursor="Open">
+                  <GithubIcon size={15} /> Inspect source <ArrowUpRight size={14} className="btn-arrow" />
                 </a>
               </div>
-            </motion.article>
-          </AnimatePresence>
+            </article>
+          ))}
 
-          <div className="project-deck-controls">
-            <button type="button" onClick={() => changeProject(-1)} aria-label="Show previous project"><ArrowLeft size={20} /></button>
-            <div className="project-deck-dots" aria-label="Project selection">
-              {projects.map((item, index) => (
-                <button
-                  key={item.index}
-                  type="button"
-                  aria-label={`Show ${item.title}`}
-                  className={index === activeIndex ? 'active' : ''}
-                  onClick={() => {
-                    setDirection(index > activeIndex ? 1 : -1)
-                    setActiveIndex(index)
-                  }}
-                >
-                  {item.index}
-                </button>
-              ))}
-            </div>
-            <button type="button" onClick={() => changeProject(1)} aria-label="Show next project"><ArrowRight size={20} /></button>
-          </div>
+          <article className="project-panel-end">
+            <span className="mono-meta">End of archive</span>
+            <h3 className="display-md">More on GitHub.</h3>
+            <a className="btn btn-line" href="https://github.com/purusottam280" target="_blank" rel="noopener noreferrer" data-cursor="Open">
+              <GithubIcon size={15} /> github.com/purusottam280
+            </a>
+          </article>
+        </div>
+      </div>
+
+      <div className="projects-progress-wrap">
+        <div className="projects-progress">
+          <div className="projects-progress-fill" ref={progressRef} />
         </div>
       </div>
     </section>

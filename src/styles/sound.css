@@ -1,0 +1,99 @@
+/* ---------- sound toggle HUD (bottom-left, mirrors .timecode) ---------- */
+
+.sound-toggle {
+  position: fixed;
+  left: 22px;
+  bottom: 20px;
+  z-index: 110;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  background: rgba(8, 9, 7, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.sound-toggle:hover,
+.sound-toggle:focus-visible {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.sound-toggle:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.sound-toggle.is-on {
+  color: var(--text);
+}
+
+.sound-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 10px;
+}
+
+.sound-eq span {
+  display: block;
+  width: 2px;
+  height: 100%;
+  background: currentColor;
+  opacity: 0.55;
+  transform: scaleY(0.25);
+  transform-origin: 50% 100%;
+}
+
+.sound-toggle.is-on .sound-eq span {
+  background: var(--accent);
+  opacity: 1;
+}
+
+/* bars only move once audio is actually running */
+.sound-toggle.is-on.is-live .sound-eq span {
+  animation: sound-eq 0.9s ease-in-out infinite alternate;
+}
+
+.sound-toggle.is-on.is-live .sound-eq span:nth-child(2) {
+  animation-duration: 0.62s;
+  animation-delay: -0.2s;
+}
+
+.sound-toggle.is-on.is-live .sound-eq span:nth-child(3) {
+  animation-duration: 1.1s;
+  animation-delay: -0.45s;
+}
+
+.sound-toggle.is-on.is-live .sound-eq span:nth-child(4) {
+  animation-duration: 0.74s;
+  animation-delay: -0.1s;
+}
+
+@keyframes sound-eq {
+  0% {
+    transform: scaleY(0.2);
+  }
+  50% {
+    transform: scaleY(0.85);
+  }
+  100% {
+    transform: scaleY(0.45);
+  }
+}
+
+@media (max-width: 640px) {
+  .sound-toggle {
+    display: none;
+  }
+}
