@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { SCRUB, gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { REVEAL, revealEach } from '../lib/reveal'
 import { splitLines } from '../lib/text'
 import { initTilt } from '../lib/tilt'
 
@@ -91,7 +92,7 @@ export default function Experience() {
       gsap.fromTo(
         '.exp-spine-fill',
         { scaleY: 0 },
-        { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.exp-list', start: 'top 70%', end: 'bottom 60%', scrub: 0.5 } }
+        { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.exp-list', start: 'top 70%', end: 'bottom 60%', scrub: SCRUB } }
       )
 
       gsap.fromTo('.exp-bg', { xPercent: -20 }, {
@@ -102,18 +103,16 @@ export default function Experience() {
 
       gsap.from('.exp-head-line', {
         yPercent: 110,
-        duration: 1.1,
-        stagger: 0.1,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.exp-head', start: 'top 82%' },
+        duration: REVEAL.duration,
+        stagger: REVEAL.stagger,
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.exp-head', start: REVEAL.start },
       })
 
-      gsap.utils.toArray<HTMLElement>('.exp-fade').forEach(el => {
-        gsap.from(el, { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } })
-      })
+      revealEach(scope.current, '.exp-fade')
 
       const splits = gsap.utils.toArray<HTMLElement>('.exp-item').map(item => {
-        const tl = gsap.timeline({ scrollTrigger: { trigger: item, start: 'top 78%' }, defaults: { ease: 'cineOut' } })
+        const tl = gsap.timeline({ scrollTrigger: { trigger: item, start: REVEAL.start }, defaults: { ease: REVEAL.ease } })
         const node = item.querySelector('.exp-node')
         const summary = item.querySelector('.exp-summary')
         const split = summary ? splitLines(summary) : null
@@ -145,7 +144,7 @@ export default function Experience() {
         <div className="section-head exp-head">
           <div>
             <span className="kicker exp-fade">
-              <span className="kicker-index">003</span> Experience
+              <span className="kicker-index">004</span> Experience
             </span>
             <h2 className="display-lg" style={{ marginTop: 16 }}>
               <span className="line">
@@ -164,7 +163,7 @@ export default function Experience() {
           </p>
         </div>
 
-        <div className="exp-list" data-skew>
+        <div className="exp-list">
           <div className="exp-spine" aria-hidden="true">
             <div className="exp-spine-fill" />
           </div>

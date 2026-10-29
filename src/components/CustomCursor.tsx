@@ -36,7 +36,7 @@ export default function CustomCursor() {
         dot.style.opacity = '1'
         ring.style.opacity = '1'
       }
-      dot.style.transform = `translate(${targetX}px, ${targetY}px)`
+      dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`
     }
 
     const onOver = (e: MouseEvent) => {
@@ -67,11 +67,16 @@ export default function CustomCursor() {
     }
 
     const loop = () => {
-      ringX += (targetX - ringX) * 0.16
-      ringY += (targetY - ringY) * 0.16
-      scale += (targetScale - scale) * 0.16
-      ring.style.transform = `translate(${ringX}px, ${ringY}px) scale(${scale})`
       raf = requestAnimationFrame(loop)
+      const dx = targetX - ringX
+      const dy = targetY - ringY
+      const ds = targetScale - scale
+      // settled: skip the write so an idle cursor costs no style work per frame
+      if (Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05 && Math.abs(ds) < 0.001) return
+      ringX += dx * 0.16
+      ringY += dy * 0.16
+      scale += ds * 0.16
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) scale(${scale})`
     }
     raf = requestAnimationFrame(loop)
 

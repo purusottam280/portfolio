@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { useGSAP } from '@gsap/react'
 import { AlertCircle, ArrowUpRight, CheckCircle, Mail, Send } from 'lucide-react'
 import { gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { REVEAL, revealEach, revealGroup } from '../lib/reveal'
 import { splitChars } from '../lib/text'
 import { initMagnetic } from '../lib/magnetic'
 import { initTilt } from '../lib/tilt'
@@ -89,22 +90,12 @@ export default function Contact() {
         rotate: 4,
         duration: 1,
         stagger: 0.018,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.contact-title', start: 'top 82%' },
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.contact-title', start: REVEAL.start },
       })
 
-      gsap.utils.toArray<HTMLElement>('.contact-fade').forEach(el => {
-        gsap.from(el, { y: 36, opacity: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 86%' } })
-      })
-
-      gsap.from('.channel', {
-        x: -40,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.contact-channels', start: 'top 85%' },
-      })
+      revealEach(scope.current, '.contact-fade')
+      revealGroup('.channel', '.contact-channels', { y: 0, x: -40 })
 
       gsap.from('.contact-bg', {
         xPercent: 30,
@@ -122,11 +113,11 @@ export default function Contact() {
       <div className="contact-bg" aria-hidden="true">
         TALK
       </div>
-      <div className="section-inner" data-skew>
+      <div className="section-inner">
         <div className="section-head">
           <div>
             <span className="kicker contact-fade">
-              <span className="kicker-index">006</span> Contact
+              <span className="kicker-index">007</span> Contact
             </span>
             <h2 className="display-lg contact-title" style={{ marginTop: 16 }}>
               Let's build something from the future.

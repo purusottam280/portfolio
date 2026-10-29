@@ -116,13 +116,14 @@ button {
 
 .page-grain {
   position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
   pointer-events: none;
-  opacity: 0.42;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.34'/%3E%3C/svg%3E");
+  opacity: 0.22;
+  will-change: transform;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1.4 -0.62'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
   z-index: 90;
   animation: grain 0.7s steps(6) infinite;
 }
@@ -266,21 +267,18 @@ button {
 
 .line-inner {
   display: block;
-  will-change: transform;
 }
 
 .split-line {
-  will-change: transform;
+  display: block;
 }
 
 .split-word {
   display: inline-block;
-  will-change: opacity, filter;
 }
 
 .split-char {
   display: inline-block;
-  will-change: transform;
 }
 
 .section {
@@ -352,7 +350,6 @@ button {
   text-decoration: none;
   overflow: hidden;
   transition: color 0.35s var(--ease-cine), border-color 0.35s var(--ease-cine), background 0.35s var(--ease-cine), box-shadow 0.35s var(--ease-cine);
-  will-change: transform;
 }
 
 .btn-arrow {
@@ -375,8 +372,7 @@ button {
 .btn-line {
   border-color: var(--line-strong);
   color: var(--text);
-  background: rgba(8, 9, 7, 0.5);
-  backdrop-filter: blur(8px);
+  background: rgba(8, 9, 7, 0.78);
 }
 
 .btn-line:hover {
@@ -531,7 +527,7 @@ button:focus-visible {
   right: 0;
   z-index: 100;
   border-bottom: 1px solid transparent;
-  transition: transform 0.55s var(--ease-cine), background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+  transition: transform 0.55s var(--ease-cine), background 0.4s ease, border-color 0.4s ease;
 }
 
 .nav-hidden {
@@ -539,9 +535,9 @@ button:focus-visible {
 }
 
 .nav-scrolled {
-  background: rgba(8, 9, 7, 0.72);
-  backdrop-filter: blur(18px) saturate(120%);
-  -webkit-backdrop-filter: blur(18px) saturate(120%);
+  background: rgba(8, 9, 7, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom-color: var(--line);
 }
 
@@ -848,8 +844,7 @@ button:focus-visible {
   width: fit-content;
   padding: 10px 16px;
   border: 1px solid var(--line-strong);
-  background: rgba(8, 9, 7, 0.55);
-  backdrop-filter: blur(8px);
+  background: rgba(8, 9, 7, 0.78);
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.14em;
@@ -1075,7 +1070,7 @@ button:focus-visible {
 .about-portrait-inner {
   position: absolute;
   inset: 0;
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 .about-strip {
@@ -1090,6 +1085,11 @@ button:focus-visible {
   left: 0;
   width: 100%;
   object-fit: cover;
+}
+
+.about-strip img.about-strip-mono {
+  filter: grayscale(1) contrast(1.15);
+  will-change: opacity;
 }
 
 .about-portrait::after {
@@ -1300,8 +1300,7 @@ button:focus-visible {
   position: relative;
   padding: clamp(24px, 3vw, 44px);
   border: 1px solid var(--line-strong);
-  background: var(--panel);
-  backdrop-filter: blur(6px);
+  background: rgba(12, 13, 9, 0.9);
 }
 
 .exp-card-line {
@@ -1750,8 +1749,18 @@ button:focus-visible {
   border: 1px solid var(--line-strong);
   background: #0c0d09;
   transform-origin: 50% 0%;
-  will-change: transform, filter;
+  will-change: transform;
   box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.skill-card-dim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #050504;
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
 }
 
 .skill-card::before {
@@ -1942,8 +1951,7 @@ button:focus-visible {
   gap: 30px;
   padding: clamp(24px, 3vw, 44px);
   border: 1px solid var(--line-strong);
-  background: var(--panel);
-  backdrop-filter: blur(6px);
+  background: rgba(12, 13, 9, 0.9);
 }
 
 .contact-form-row {
@@ -2228,12 +2236,12 @@ textarea.field-input {
 }
 
 @keyframes grain {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-5%, -7%); }
-  40% { transform: translate(-9%, 3%); }
-  60% { transform: translate(4%, -4%); }
-  80% { transform: translate(-2%, 8%); }
-  100% { transform: translate(6%, 2%); }
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-4%, -5%, 0); }
+  40% { transform: translate3d(-6%, 2%, 0); }
+  60% { transform: translate3d(3%, -3%, 0); }
+  80% { transform: translate3d(-1%, 6%, 0); }
+  100% { transform: translate3d(5%, 1%, 0); }
 }
 
 /* ---------- responsive ---------- */

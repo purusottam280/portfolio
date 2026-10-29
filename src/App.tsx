@@ -1,69 +1,45 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
-import { motion, useScroll, useSpring } from 'motion/react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import CustomCursor from './components/CustomCursor'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Manifesto from './components/Manifesto'
 import Intro from './components/Intro'
+import About from './components/About'
+import Experience from './components/Experience'
+import Projects from './components/Projects'
+import Skills from './components/Skills'
+import Contact from './components/Contact'
 import Footer from './components/Footer'
 import Timecode from './components/Timecode'
 import FilmReel from './components/FilmReel'
 import SoundToggle from './components/SoundToggle'
 import './styles/sound.css'
 import './styles/tilt.css'
-import { initScroll, stopScroll, startScroll, ScrollTrigger, gsap, scrollState, prefersReducedMotion } from './lib/scroll'
+import { initScroll, stopScroll, startScroll, refreshScroll, gsap, scrollState } from './lib/scroll'
 
-// Lazy-load below-fold sections for performance
-// the WebGL background shares the three.js chunk with the hero avatar instead of bloating the main bundle
+// Sections are imported eagerly: they are small, and mounting them together means every ScrollTrigger is created in
+// page order with final layout (no spinner-to-content height jumps shifting trigger positions mid-scroll).
+// Only the WebGL background is deferred; it shares the three.js chunk with the hero avatar.
 const Atmosphere = lazy(() => import('./components/Atmosphere'))
-const About = lazy(() => import('./components/About'))
-const Experience = lazy(() => import('./components/Experience'))
-const Projects = lazy(() => import('./components/Projects'))
-const Skills = lazy(() => import('./components/Skills'))
-const Contact = lazy(() => import('./components/Contact'))
 
-function SectionFallback() {
-  return (
-    <div className="flex items-center justify-center py-32" style={{ background: 'transparent' }}>
-      <div
-        className="w-8 h-8 rounded-full border-2 animate-spin"
-        style={{ borderColor: 'rgba(233,255,75,0.2)', borderTopColor: '#e9ff4b' }}
-      />
-    </div>
-  )
-}
-
+/** Top progress hairline, written from the shared scroll tick (no extra animation loop). */
 function ScrollTelemetry() {
-  const { scrollYProgress } = useScroll()
-  const scaleX = useSpring(scrollYProgress, { stiffness: 180, damping: 30, mass: 0.22 })
-  return <motion.div className="scroll-telemetry" style={{ scaleX }} aria-hidden="true" />
-}
-
-/** Velocity-driven skew: every [data-skew] block leans into the scroll direction and settles back. */
-function useVelocitySkew() {
+  const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (prefersReducedMotion()) return
-    let setters: ((v: number) => void)[] = []
-    const collect = () => {
-      setters = gsap.utils.toArray<HTMLElement>('[data-skew]').map(el => gsap.quickSetter(el, 'skewY', 'deg') as (v: number) => void)
-    }
-    collect()
-    const observer = new MutationObserver(collect)
-    observer.observe(document.body, { childList: true, subtree: true })
-
-    let current = 0
+    const el = ref.current
+    if (!el) return
+    const set = gsap.quickSetter(el, 'scaleX') as (v: number) => void
+    let last = -1
     const tick = () => {
-      const target = gsap.utils.clamp(-5, 5, scrollState.velocity * 0.06)
-      current += (target - current) * 0.12
-      if (Math.abs(current) < 0.01 && Math.abs(target) < 0.01) return
-      setters.forEach(set => set(current))
+      const p = Math.round(scrollState.progress * 1000) / 1000
+      if (p === last) return
+      last = p
+      set(p)
     }
     gsap.ticker.add(tick)
-    return () => {
-      gsap.ticker.remove(tick)
-      observer.disconnect()
-    }
+    return () => gsap.ticker.remove(tick)
   }, [])
+  return <div ref={ref} className="scroll-telemetry" aria-hidden="true" />
 }
 
 export default function App() {
@@ -76,12 +52,11 @@ export default function App() {
     return () => cleanupScroll()
   }, [])
 
-  useVelocitySkew()
-
   const handleIntroDone = () => {
     setIntroDone(true)
     startScroll()
-    window.setTimeout(() => ScrollTrigger.refresh(), 120)
+    // one ordered re-measure once the hero title has its final layout
+    requestAnimationFrame(() => requestAnimationFrame(refreshScroll))
   }
 
   return (
@@ -101,21 +76,11 @@ export default function App() {
       <main>
         <Hero play={introDone} />
         <Manifesto />
-        <Suspense fallback={<SectionFallback />}>
-          <About />
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <Experience />
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <Projects />
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <Skills />
-        </Suspense>
-        <Suspense fallback={<SectionFallback />}>
-          <Contact />
-        </Suspense>
+        <About />
+        <Experience />
+        <Projects />
+        <Skills />
+        <Contact />
       </main>
       <Footer />
     </div>

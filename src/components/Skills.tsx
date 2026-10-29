@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import Marquee from './Marquee'
 import { gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { REVEAL, revealEach } from '../lib/reveal'
 import { splitChars } from '../lib/text'
 import { initTilt } from '../lib/tilt'
 
@@ -63,30 +64,22 @@ export default function Skills() {
         yPercent: 110,
         duration: 1,
         stagger: 0.02,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.skills-head', start: 'top 80%' },
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.skills-head', start: REVEAL.start },
       })
 
-      gsap.utils.toArray<HTMLElement>('.skills-fade').forEach(el => {
-        gsap.from(el, { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 85%' } })
-      })
+      revealEach(scope.current, '.skills-fade')
 
       // --- stacking cards: each card pins, the next one slides over and pushes it back in depth ---
       const cards = gsap.utils.toArray<HTMLElement>('.skill-card')
       cards.forEach((card, i) => {
         const next = cards[i + 1]
         if (next) {
-          gsap.fromTo(
-            card,
-            { scale: 1, filter: 'brightness(1)', yPercent: 0 },
-            {
-              scale: 0.92 - i * 0.015,
-              filter: 'brightness(0.45)',
-              yPercent: -4,
-              ease: 'none',
-              scrollTrigger: { trigger: next, start: 'top bottom', end: 'top 12%', scrub: true },
-            }
-          )
+          // push back in depth: scale on the card, darkening on a child overlay (opacity, not a repainting filter)
+          const push = { trigger: next, start: 'top bottom', end: 'top 12%', scrub: true }
+          gsap.fromTo(card, { scale: 1, yPercent: 0 }, { scale: 0.92 - i * 0.015, yPercent: -4, ease: 'none', scrollTrigger: push })
+          const dim = card.querySelector('.skill-card-dim')
+          if (dim) gsap.fromTo(dim, { opacity: 0 }, { opacity: 0.55, ease: 'none', scrollTrigger: push })
         }
 
         gsap.from(card, {
@@ -95,9 +88,9 @@ export default function Skills() {
           transformPerspective: 1000,
           transformOrigin: '50% 100%',
           opacity: 0,
-          duration: 1,
-          ease: 'cineOut',
-          scrollTrigger: { trigger: card, start: 'top 90%' },
+          duration: REVEAL.duration,
+          ease: REVEAL.ease,
+          scrollTrigger: { trigger: card, start: REVEAL.start },
         })
 
         const fills = card.querySelectorAll<HTMLElement>('.skill-bar-fill')
@@ -139,7 +132,7 @@ export default function Skills() {
       <div className="section-head skills-head">
         <div>
           <span className="kicker skills-fade">
-            <span className="kicker-index">005</span> Capabilities
+            <span className="kicker-index">006</span> Capabilities
           </span>
           <h2 className="display-lg skills-title" style={{ marginTop: 16 }}>
             The stack behind the machine.
@@ -162,6 +155,7 @@ export default function Skills() {
             className="skill-card"
             style={{ '--i': index, '--accent-c': group.accent } as React.CSSProperties}
           >
+            <div className="skill-card-dim" aria-hidden="true" />
             <div className="skill-card-head">
               <span className="skill-row-index">
                 {String(index + 1).padStart(2, '0')} / {String(skillGroups.length).padStart(2, '0')}
@@ -188,7 +182,7 @@ export default function Skills() {
         ))}
       </div>
 
-      <div className="skills-quote skills-fade" data-skew>
+      <div className="skills-quote skills-fade">
         <div className="display-md" style={{ maxWidth: 720 }}>
           Fast to build. Clear to understand. Hard to break.
         </div>

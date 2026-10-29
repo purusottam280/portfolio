@@ -132,16 +132,20 @@ const planeFragment = /* glsl */ `
     vec3 col = gradePortrait(base);
     float alphaBase = portraitAlpha(base);
 
-    // dissolve reveal through fbm noise
-    float n = revealNoise(base);
-    float rv = uReveal * 1.25 - 0.12;
-    float edge = 0.09;
-    float vis = 1.0 - smoothstep(rv - edge, rv, n);
+    // dissolve reveal through fbm noise (skipped entirely once fully emerged: the costliest part of the shader)
+    float vis = 1.0;
+    vec3 glow = vec3(0.0);
+    if (uReveal < 0.999) {
+      float n = revealNoise(base);
+      float rv = uReveal * 1.25 - 0.12;
+      float edge = 0.09;
+      vis = 1.0 - smoothstep(rv - edge, rv, n);
 
-    // burning accent frontier
-    float frontier = smoothstep(rv - edge * 2.6, rv, n) * (1.0 - smoothstep(rv, rv + edge * 0.6, n));
-    float glowFade = (1.0 - smoothstep(0.92, 1.0, uReveal)) * step(0.001, uReveal) * uGlow;
-    vec3 glow = mix(uAccent2, uAccent, frontier) * frontier * glowFade * 1.6;
+      // burning accent frontier
+      float frontier = smoothstep(rv - edge * 2.6, rv, n) * (1.0 - smoothstep(rv, rv + edge * 0.6, n));
+      float glowFade = (1.0 - smoothstep(0.92, 1.0, uReveal)) * step(0.001, uReveal) * uGlow;
+      glow = mix(uAccent2, uAccent, frontier) * frontier * glowFade * 1.6;
+    }
 
     // film grain + faint scanline sweep
     float grain = (hash(vUv * uRes + fract(uTime) * 100.0) - 0.5) * 0.07;
@@ -181,8 +185,11 @@ const pointsVertex = /* glsl */ `
     }
 
     // follow the plane's reveal mask so a half-emerged portrait never pops in whole
-    float rv = uReveal * 1.25 - 0.12;
-    float vis = 1.0 - smoothstep(rv - 0.09, rv, revealNoise(g));
+    float vis = 1.0;
+    if (uReveal < 0.999) {
+      float rv = uReveal * 1.25 - 0.12;
+      vis = 1.0 - smoothstep(rv - 0.09, rv, revealNoise(g));
+    }
 
     vec3 col = gradePortrait(g);
 
@@ -448,21 +455,23 @@ class GLBoundary extends Component<{ fallback: ReactNode; children: ReactNode },
 type Props = {
   src: string
   ctrl: AvatarCtrl
+  /** false pauses rendering entirely (hero scrolled away) */
+  active?: boolean
   className?: string
   alt?: string
 }
 
 /** Full-bleed WebGL portrait. Falls back to a plain <img> if WebGL is unavailable. */
-export default function AvatarCanvas({ src, ctrl, className = '', alt = '' }: Props) {
+export default function AvatarCanvas({ src, ctrl, active = true, className = '', alt = '' }: Props) {
   const texture = useImageTexture(src)
   const fallback = <img src={src} alt={alt} className="avatar-fallback" />
   return (
     <div className={`avatar-canvas ${className}`}>
       <GLBoundary fallback={fallback}>
         <Canvas
-          dpr={[1, 1.75]}
+          dpr={[1, 1.5]}
           gl={{ alpha: true, antialias: false, powerPreference: 'high-performance', premultipliedAlpha: true }}
-          frameloop="always"
+          frameloop={active ? 'always' : 'never'}
           orthographic
           camera={{ position: [0, 0, 1], zoom: 1 }}
           style={{ position: 'absolute', inset: 0 }}

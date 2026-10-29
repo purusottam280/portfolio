@@ -52,11 +52,13 @@ export default function FilmReel() {
     let lastFrame = -1
 
     const write = (progress: number, moveFilm: boolean) => {
-      const y = window.scrollY
+      // scrollState.y is the engine's in-memory offset; reading window.scrollY here would force a style recalc
+      const y = reduced ? window.scrollY : scrollState.y
       if (moveFilm) {
-        const bg = -((y * FILM_SPEED) % FRAME_PX)
+        // the strip is one frame taller than the gate and slides by transform: compositor-only, no repaint
+        const bg = Math.round(-((y * FILM_SPEED) % FRAME_PX) * 10) / 10
         if (bg !== lastBg) {
-          holes.style.backgroundPositionY = `${bg.toFixed(2)}px`
+          holes.style.transform = `translate3d(0, ${bg}px, 0)`
           lastBg = bg
         }
       }

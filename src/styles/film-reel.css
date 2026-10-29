@@ -8,7 +8,7 @@
   width: 22px;
   z-index: 95;
   pointer-events: none;
-  overflow: visible;
+  overflow: visible; /* the playhead and frame label extend past the strip */
   /* near-black base with faint edge lines (outer rails + inner rails beside the sprocket columns) */
   background:
     linear-gradient(
@@ -27,7 +27,10 @@
 
 .film-reel-holes {
   position: absolute;
-  inset: 0 1px;
+  top: 0;
+  left: 1px;
+  right: 1px;
+  bottom: -48px; /* one full frame of overscan so the translate never reveals an edge */
   /* background-position-y is driven per frame from scroll; all layers tile on multiples of 12px / 48px */
   background-image:
     /* left sprocket column */
@@ -38,9 +41,8 @@
     linear-gradient(to bottom, rgba(245, 244, 232, 0.09) 0 1px, transparent 1px);
   background-size: 20px 12px, 20px 12px, 20px 48px;
   background-repeat: repeat-y;
-  background-position-x: 0;
-  background-position-y: 0;
-  will-change: background-position;
+  background-position: 0 0;
+  will-change: transform;
 }
 
 /* gate light: very faint accent glow at the strip centre, as if lit from behind */

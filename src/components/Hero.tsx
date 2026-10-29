@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import { ArrowDown, ArrowUpRight } from 'lucide-react'
 import { createAvatarCtrl } from '../lib/avatar'
-import { gsap, prefersReducedMotion, registerScene, scrollToSection } from '../lib/scroll'
+import { SCRUB, gsap, prefersReducedMotion, registerScene, scrollToSection } from '../lib/scroll'
 import { splitChars } from '../lib/text'
 
 // three.js + the shader live in their own chunk so the intro can play while they download
@@ -15,6 +15,8 @@ export default function Hero({ play }: { play: boolean }) {
   const [ctrl] = useState(() => createAvatarCtrl())
   const [roleIndex, setRoleIndex] = useState(0)
   const [entered, setEntered] = useState(false)
+  // the WebGL portrait only renders while the opening scene is on screen
+  const [onStage, setOnStage] = useState(true)
 
   useEffect(() => {
     const timer = window.setInterval(() => setRoleIndex(i => (i + 1) % roles.length), 2800)
@@ -70,8 +72,9 @@ export default function Hero({ play }: { play: boolean }) {
           start: 'top top',
           end: '+=170%',
           pin: true,
-          scrub: 0.6,
-          anticipatePin: 1,
+          scrub: SCRUB,
+          onLeave: () => setOnStage(false),
+          onEnterBack: () => setOnStage(true),
         },
       })
 
@@ -95,7 +98,7 @@ export default function Hero({ play }: { play: boolean }) {
         <div className="hero-avatar-wrap">
           <div className="hero-avatar">
             <Suspense fallback={null}>
-              <AvatarCanvas src="/profile.jpg" ctrl={ctrl} alt="Purusottam Patel" />
+              <AvatarCanvas src="/profile.jpg" ctrl={ctrl} active={onStage} alt="Purusottam Patel" />
             </Suspense>
           </div>
         </div>

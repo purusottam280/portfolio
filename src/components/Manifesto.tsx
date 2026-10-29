@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
-import { gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { SCRUB, gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
 import { splitWords } from '../lib/text'
 
 export default function Manifesto() {
@@ -18,11 +18,12 @@ export default function Manifesto() {
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
-        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: 0.5 },
+        scrollTrigger: { trigger: el, start: 'top top', end: 'bottom bottom', scrub: SCRUB },
       })
 
       tl.fromTo('.manifesto-bg', { xPercent: -36, yPercent: -50 }, { xPercent: -64, yPercent: -50, duration: 1 }, 0)
-        .fromTo(split.words, { opacity: 0.1, filter: 'blur(6px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.4, stagger: { each: 0.018 } }, 0.04)
+        // opacity only: a filter per word would repaint every word on every scrubbed frame
+        .fromTo(split.words, { opacity: 0.12, yPercent: 18 }, { opacity: 1, yPercent: 0, duration: 0.4, stagger: { each: 0.018 } }, 0.04)
         .from('.manifesto-meta', { opacity: 0, y: 16, duration: 0.1 }, 0.5)
         .fromTo('.manifesto-line', { scaleX: 0 }, { scaleX: 1, duration: 0.5 }, 0.04)
         // zoom-through into the next scene
@@ -45,7 +46,7 @@ export default function Manifesto() {
           Complex systems should feel <span className="accent-text">calm</span>. I build AI that is fast to trust,
           hard to break, and engineered to <span className="accent-text">ship</span>.
         </p>
-        <div className="manifesto-meta mono-meta">Operating principles — Transmission 002</div>
+        <div className="manifesto-meta mono-meta">Operating principles — Scene 002</div>
       </div>
     </section>
   )

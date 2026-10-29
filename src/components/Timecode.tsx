@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { gsap, getActiveScene } from '../lib/scroll'
+import { gsap, onSceneChange, scrollState } from '../lib/scroll'
 
 const FPS = 24
 const TOTAL_SECONDS = 142 // fake "runtime" of the film the scroll traverses
@@ -16,37 +16,34 @@ export default function Timecode() {
 
   useEffect(() => {
     let shown = 0
+    let lastFrame = -1
     const tick = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
-      shown += (progress - shown) * 0.12
+      shown += (scrollState.progress - shown) * 0.12
       const totalFrames = Math.round(shown * TOTAL_SECONDS * FPS)
+      // the text only changes when the frame number does; idle frames cost nothing
+      if (totalFrames === lastFrame || !tcRef.current) return
+      lastFrame = totalFrames
       const frames = totalFrames % FPS
       const seconds = Math.floor(totalFrames / FPS)
       const minutes = Math.floor(seconds / 60)
-      if (tcRef.current) {
-        tcRef.current.textContent = `00:${pad(minutes)}:${pad(seconds % 60)}:${pad(frames)}`
-      }
+      tcRef.current.textContent = `00:${pad(minutes)}:${pad(seconds % 60)}:${pad(frames)}`
     }
     gsap.ticker.add(tick)
     return () => gsap.ticker.remove(tick)
   }, [])
 
-  useEffect(() => {
-    let current = ''
-    const tick = () => {
-      const scene = getActiveScene()
-      if (!scene || scene.label === current) return
-      current = scene.label
-      if (sceneRef.current) {
-        sceneRef.current.textContent = scene.label
-        gsap.fromTo(sceneRef.current, { yPercent: 40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'cineOut' })
-      }
-      if (indexRef.current) indexRef.current.textContent = `SC ${scene.index}`
-    }
-    gsap.ticker.add(tick)
-    return () => gsap.ticker.remove(tick)
-  }, [])
+  useEffect(
+    () =>
+      onSceneChange(scene => {
+        if (!scene) return
+        if (sceneRef.current) {
+          sceneRef.current.textContent = scene.label
+          gsap.fromTo(sceneRef.current, { yPercent: 40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'cineOut' })
+        }
+        if (indexRef.current) indexRef.current.textContent = `SC ${scene.index}`
+      }),
+    []
+  )
 
   return (
     <div className="timecode" aria-hidden="true">

@@ -12,7 +12,7 @@ export default function Footer() {
   return (
     <footer className="footer" ref={root}>
       <Marquee giant items={['Purusottam Patel', 'AI Engineer', "Let's build", 'Agentic systems']} duration={48} />
-      <div className="footer-grid" data-skew>
+      <div className="footer-grid">
         <div>
           <div className="footer-col-title">Profile</div>
           <p className="copy" style={{ maxWidth: 320 }}>

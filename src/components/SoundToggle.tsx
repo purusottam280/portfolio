@@ -46,7 +46,13 @@ export default function SoundToggle() {
       window.addEventListener('keydown', arm)
     }
 
+    // onSceneChange reports the current scene immediately; only actual scene changes should tick
+    let primed = false
     const offScene = onSceneChange(scene => {
+      if (!primed) {
+        primed = true
+        return
+      }
       if (scene) tick()
     })
 

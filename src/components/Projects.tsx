@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import { ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from './Icons'
-import { gsap, ScrollTrigger, prefersReducedMotion, registerScene, scrollState } from '../lib/scroll'
+import { SCRUB, gsap, ScrollTrigger, prefersReducedMotion, registerScene, scrollState } from '../lib/scroll'
+import { REVEAL, revealGroup } from '../lib/reveal'
 import { initTilt } from '../lib/tilt'
 
 type Project = {
@@ -26,7 +27,7 @@ const projects: Project[] = [
     accent: '#e9ff4b',
     metric: 'LLaMA 3.1',
     metricLabel: 'entity parser',
-    image: '/hiring_signals.png',
+    image: '/hiring_signals.webp',
     index: '01',
   },
   {
@@ -37,7 +38,7 @@ const projects: Project[] = [
     accent: '#ff5a1f',
     metric: 'LLaMA 3.3',
     metricLabel: 'inference engine',
-    image: '/hiring_intelligence.png',
+    image: '/hiring_intelligence.webp',
     index: '02',
   },
   {
@@ -48,7 +49,7 @@ const projects: Project[] = [
     accent: '#ffdd00',
     metric: '10+',
     metricLabel: 'languages',
-    image: '/multilingual_finance.png',
+    image: '/multilingual_finance.webp',
     index: '03',
   },
   {
@@ -59,7 +60,7 @@ const projects: Project[] = [
     accent: '#fc314d',
     metric: 'Multi-step',
     metricLabel: 'planning flow',
-    image: '/agentic_travel.png',
+    image: '/agentic_travel.webp',
     index: '04',
   },
 ]
@@ -91,10 +92,9 @@ export default function Projects() {
           start: 'top top',
           end: () => `+=${distance()}`,
           pin: true,
-          scrub: 1,
+          scrub: SCRUB,
           animation: tween,
           invalidateOnRefresh: true,
-          anticipatePin: 1,
           onUpdate: self => {
             if (progressRef.current) progressRef.current.style.transform = `scaleX(${self.progress})`
             if (counterRef.current) {
@@ -104,12 +104,16 @@ export default function Projects() {
           },
         })
 
-        // velocity skew on the horizontal track
+        // velocity skew on the horizontal track (the one place kinetic skew lives); writes only while it moves
         const skewSet = gsap.quickSetter(track, 'skewX', 'deg') as (v: number) => void
         let skew = 0
+        let written = 0
         const tick = () => {
-          const target = gsap.utils.clamp(-8, 8, scrollState.velocity * 0.1)
+          const target = gsap.utils.clamp(-6, 6, scrollState.velocity * 0.08)
           skew += (target - skew) * 0.1
+          if (Math.abs(skew) < 0.005) skew = 0
+          if (Math.abs(skew - written) < 0.005) return
+          written = skew
           skewSet(skew)
         }
         gsap.ticker.add(tick)
@@ -162,23 +166,16 @@ export default function Projects() {
       mm.add('(max-width: 900px)', () => {
         gsap.utils.toArray<HTMLElement>('.project-panel').forEach(panel => {
           gsap.from(panel, {
-            y: 60,
+            y: REVEAL.y * 2,
             opacity: 0,
-            duration: 0.9,
-            ease: 'cineOut',
-            scrollTrigger: { trigger: panel, start: 'top 85%' },
+            duration: REVEAL.duration,
+            ease: REVEAL.ease,
+            scrollTrigger: { trigger: panel, start: REVEAL.start },
           })
         })
       })
 
-      gsap.from('.projects-head > *', {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.1,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.projects-head', start: 'top 80%' },
-      })
+      revealGroup('.projects-head > *', '.projects-head')
     },
     { scope }
   )
@@ -188,7 +185,7 @@ export default function Projects() {
       <div className="projects-head">
         <div>
           <span className="kicker">
-            <span className="kicker-index">004</span> Selected work
+            <span className="kicker-index">005</span> Selected work
           </span>
           <h2 className="display-lg" style={{ marginTop: 16 }}>
             Systems that <span className="accent-text">don't sit still.</span>
@@ -210,7 +207,7 @@ export default function Projects() {
             <article key={project.index} className="project-panel" style={{ '--accent-p': project.accent } as React.CSSProperties}>
               <div className="project-index">{project.index}</div>
               <div className="project-media" data-cursor="View">
-                <img src={project.image} alt={project.title} loading="lazy" onLoad={() => ScrollTrigger.refresh()} />
+                <img src={project.image} alt={project.title} loading="eager" decoding="async" />
                 <div className="project-media-shade" />
                 <div className="project-media-caption mono-meta">Classified build / {project.subtitle}</div>
               </div>

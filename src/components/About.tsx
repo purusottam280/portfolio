@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import { Brain, Compass, Layers3, Workflow } from 'lucide-react'
-import { gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { SCRUB, gsap, prefersReducedMotion, registerScene } from '../lib/scroll'
+import { REVEAL, revealEach } from '../lib/reveal'
 import { splitLines } from '../lib/text'
 
 const principles = [
@@ -39,19 +40,13 @@ export default function About() {
           opacity: 1,
           ease: 'none',
           stagger: 0.04,
-          scrollTrigger: { trigger: '.about-portrait', start: 'top 92%', end: 'top 30%', scrub: 0.4 },
+          scrollTrigger: { trigger: '.about-portrait', start: 'top 92%', end: 'top 30%', scrub: SCRUB },
         }
       )
-      gsap.fromTo(
-        '.about-portrait-inner',
-        { filter: 'grayscale(1) contrast(1.15)', scale: 1.08 },
-        {
-          filter: 'grayscale(0) contrast(1.02)',
-          scale: 1,
-          ease: 'none',
-          scrollTrigger: { trigger: scope.current, start: 'top 40%', end: 'bottom 90%', scrub: 0.6 },
-        }
-      )
+      // colour bleeds in by fading a pre-filtered mono copy (opacity is compositor-only; a scrubbed filter repaints)
+      const bleed = { trigger: scope.current, start: 'top 40%', end: 'bottom 90%', scrub: SCRUB }
+      gsap.fromTo('.about-portrait-inner', { scale: 1.08 }, { scale: 1, ease: 'none', scrollTrigger: bleed })
+      gsap.fromTo('.about-strip-mono', { opacity: 1 }, { opacity: 0, ease: 'none', scrollTrigger: bleed })
       gsap.from('.about-portrait-corner', {
         scale: 0,
         duration: 0.6,
@@ -70,25 +65,23 @@ export default function About() {
       // --- headline lines ---
       gsap.from('.about-line-inner', {
         yPercent: 110,
-        duration: 1.1,
-        stagger: 0.1,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.about-head', start: 'top 82%' },
+        duration: REVEAL.duration,
+        stagger: REVEAL.stagger,
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.about-head', start: REVEAL.start },
       })
 
       // --- lead copy: masked line reveal ---
       const lead = splitLines('.about-lead')
       gsap.from(lead.lines, {
         yPercent: 105,
-        duration: 0.9,
-        stagger: 0.07,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.about-lead', start: 'top 85%' },
+        duration: REVEAL.duration,
+        stagger: REVEAL.stagger,
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.about-lead', start: REVEAL.start },
       })
 
-      gsap.utils.toArray<HTMLElement>('.about-fade').forEach(el => {
-        gsap.from(el, { y: 36, opacity: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } })
-      })
+      revealEach(scope.current, '.about-fade')
 
       // --- counters ---
       gsap.utils.toArray<HTMLElement>('.about-stat-value').forEach(el => {
@@ -104,7 +97,7 @@ export default function About() {
           onUpdate: () => {
             el.textContent = `${Math.round(state.val)}${suffix}`
           },
-          scrollTrigger: { trigger: el, start: 'top 88%' },
+          scrollTrigger: { trigger: el, start: REVEAL.start },
         })
       })
 
@@ -115,10 +108,10 @@ export default function About() {
         opacity: 0,
         transformPerspective: 900,
         transformOrigin: '50% 0%',
-        duration: 0.9,
-        stagger: 0.1,
-        ease: 'cineOut',
-        scrollTrigger: { trigger: '.about-principles', start: 'top 82%' },
+        duration: REVEAL.duration,
+        stagger: REVEAL.stagger,
+        ease: REVEAL.ease,
+        scrollTrigger: { trigger: '.about-principles', start: REVEAL.start },
       })
 
       return () => lead.revert()
@@ -129,13 +122,13 @@ export default function About() {
   return (
     <section id="about" className="section about" ref={scope}>
       <div className="about-bg-index" aria-hidden="true">
-        02
+        03
       </div>
-      <div className="section-inner about-grid" data-skew>
+      <div className="section-inner about-grid">
         <div className="about-sticky">
           <div className="about-head">
             <span className="kicker about-fade">
-              <span className="kicker-index">002</span> About
+              <span className="kicker-index">003</span> About
             </span>
             <h2 className="display-lg" style={{ marginTop: 18 }}>
               <span className="line">
@@ -158,6 +151,13 @@ export default function About() {
                     src="/profile.jpg"
                     alt={i === 0 ? 'Purusottam Patel portrait' : ''}
                     aria-hidden={i !== 0}
+                    style={{ height: `${STRIPS * 100}%`, top: `-${i * 100}%` }}
+                  />
+                  <img
+                    src="/profile.jpg"
+                    alt=""
+                    aria-hidden
+                    className="about-strip-mono"
                     style={{ height: `${STRIPS * 100}%`, top: `-${i * 100}%` }}
                   />
                 </div>

@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Menu, X } from 'lucide-react'
-import { gsap, prefersReducedMotion, scrollToSection } from '../lib/scroll'
+import { gsap, onSceneChange, prefersReducedMotion, scrollToSection } from '../lib/scroll'
 
 const navLinks = [
-  { label: 'About', href: '#about', index: '01' },
-  { label: 'Experience', href: '#experience', index: '02' },
-  { label: 'Work', href: '#projects', index: '03' },
-  { label: 'Stack', href: '#skills', index: '04' },
-  { label: 'Contact', href: '#contact', index: '05' },
+  // indices are the film's scene numbers, matching the section kickers and the SC readout in the HUD
+  { label: 'About', href: '#about', index: '03' },
+  { label: 'Experience', href: '#experience', index: '04' },
+  { label: 'Work', href: '#projects', index: '05' },
+  { label: 'Stack', href: '#skills', index: '06' },
+  { label: 'Contact', href: '#contact', index: '07' },
 ]
 
 export default function Navbar() {
@@ -48,23 +49,8 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [mobileOpen])
 
-  useEffect(() => {
-    const observers: IntersectionObserver[] = []
-    const sections = ['about', 'experience', 'projects', 'skills', 'contact']
-    sections.forEach(id => {
-      const el = document.getElementById(id)
-      if (!el) return
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id)
-        },
-        { threshold: 0.5 }
-      )
-      observer.observe(el)
-      observers.push(observer)
-    })
-    return () => observers.forEach(obs => obs.disconnect())
-  }, [])
+  // same source of truth as the HUD: the scene whose top has crossed mid-screen
+  useEffect(() => onSceneChange(scene => setActiveSection(scene?.id ?? '')), [])
 
   return (
     <header className={`nav ${hidden ? 'nav-hidden' : ''} ${scrolled ? 'nav-scrolled' : ''}`}>
